@@ -8,7 +8,7 @@ workspace "Vulkan-Engine"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-vulkanDir = "C:/VulkanSDK/1.2.176.1"
+vulkanDir = "C:/VulkanSDK/1.2.182.0"
 
 include "Vulkan-Engine/ext/glfw"
 
@@ -39,6 +39,7 @@ project "Vulkan-Engine"
 
     includedirs
 	{
+		"%{prj.name}/src",
         "%{prj.name}/ext/glm",
         "%{prj.name}/ext/glfw/glfw/include",
         "%{vulkanDir}/include"

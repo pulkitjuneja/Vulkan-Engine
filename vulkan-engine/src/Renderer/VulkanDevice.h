@@ -8,6 +8,8 @@
 #include "Logger.h"
 #include <optional>
 #include <set>
+#include "EngineContext.h"
+#include "VulkanInstance.h"
 
 struct QueueFamilyIndices {
 	std::optional<uint32_t> graphicsFamily;
@@ -23,21 +25,18 @@ struct QueueHandles {
 	VkQueue presentQueue;
 };
 
-class VulkanDevice {
-protected:
+struct VulkanDevice {
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkDevice logicalDevice;
 	VkSurfaceKHR surfaceRef;
 
-	// Make this global, normal class member ? what is the rigth way
 	const std::vector<const char*> requestedDeviceExtensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-public:
 	QueueHandles queues;
 
-	void initialize(const VkInstance instance, bool enableValidationLayers,
+	void initialize(const VulkanInstance instance,
 		const VkSurfaceKHR currentSurface);
 	void release();
 

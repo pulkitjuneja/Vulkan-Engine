@@ -3,18 +3,30 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <memory>
 #include "Window.h"
 #include "Logger.h"
-#include "VulkanContext.h"
+#include "EngineContext.h"
+#include "Renderer/VulkanContext.h"
+#include "Renderer/StandardPipeline.h"
+#include "Renderer/VulkanCommandBuffer.h"
 
 class Engine {
 protected:
-	Window* window;
+	std::unique_ptr<Window> window;
+	std::unique_ptr<VulkanContext> graphicsContext;
 	bool isEngineRunning;
-	VulkanContext vulkanContext;
+	size_t currentFrame = 0;
+
+	std::vector<VulkanCommandBuffer> screenCommandBUffers;
+	StandardPipeline pipeline;
+
 public:
 	Engine() = default;
 	~Engine();
+
+	void recordCommandBuffers();
+	void renderLoop();
 	void start();
 };
 

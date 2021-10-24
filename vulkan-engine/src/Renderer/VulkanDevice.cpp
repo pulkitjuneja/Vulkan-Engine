@@ -1,10 +1,10 @@
 #include "VulkanDevice.h"
 
-void VulkanDevice::initialize(const VkInstance instance, bool enableValidationLayers, const VkSurfaceKHR currentSurface)
+void VulkanDevice::initialize(const VulkanInstance instance, const VkSurfaceKHR currentSurface)
 {
 	surfaceRef = currentSurface;
-	initPhysicalDevice(instance);
-	initLogicalDevice(enableValidationLayers);
+	initPhysicalDevice(instance.vkInstance);
+	initLogicalDevice(instance.enableValidationLayers);
 }
 
 void VulkanDevice::initPhysicalDevice(VkInstance instance)

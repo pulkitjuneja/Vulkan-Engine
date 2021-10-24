@@ -1,6 +1,6 @@
 [submodule "vulkan-engine/ext/glm"]
 	path = vulkan-engine/ext/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "vulkan-engine/ext/glfw"]
-	path = vulkan-engine/ext/glfw
+[submodule "Vulkan-Engine/ext/glfw/glfw"]
+	path = Vulkan-Engine/ext/glfw/glfw
 	url = https://github.com/glfw/glfw.git

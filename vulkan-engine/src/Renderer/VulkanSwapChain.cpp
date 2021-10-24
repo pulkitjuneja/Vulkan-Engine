@@ -1,4 +1,5 @@
 #include "VulkanSwapChain.h"
+#include "VulkanContext.h"
 
 void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR surface)
 {
@@ -50,14 +51,14 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	VkImageFormatProperties props{};
 	//vkGetPhysicalDeviceImageFormatProperties(device.getPhysicalDevice(),createInfo.imageFormat,)
 
-	VkResult res = vkCreateSwapchainKHR(device.getLogicalDevice(), &createInfo, nullptr, &swapChain);
+	VkResult res = vkCreateSwapchainKHR(device.getLogicalDevice(), &createInfo, nullptr, &vkSwapChain);
 	if (res != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(device.getLogicalDevice(), swapChain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(device.getLogicalDevice(), vkSwapChain, &imageCount, nullptr);
 	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(device.getLogicalDevice(), swapChain, &imageCount, swapChainImages.data());
+	vkGetSwapchainImagesKHR(device.getLogicalDevice(), vkSwapChain, &imageCount, swapChainImages.data());
 
 	createImageViews(device);
 }
@@ -68,7 +69,7 @@ void VulkanSwapChain::release(const VulkanDevice& device)
 		vkDestroyImageView(device.getLogicalDevice(), imageView, nullptr);
 	}
 
-	vkDestroySwapchainKHR(device.getLogicalDevice(), swapChain, nullptr);
+	vkDestroySwapchainKHR(device.getLogicalDevice(), vkSwapChain, nullptr);
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const VulkanDevice& device, const VkSurfaceKHR surface)
@@ -130,6 +131,29 @@ VkExtent2D VulkanSwapChain::chooseSwapExtent(const VulkanDevice& device, const V
 
 }
 
+void VulkanSwapChain::createFrameBuffers(const VulkanDevice& device, VkRenderPass& renderPass)
+{
+	frameBuffers.resize(swapChainImageViews.size());
+	for (int i = 0; i < swapChainImageViews.size(); i++) {
+		VkImageView attachments[] = {
+			swapChainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = swapChainExtent.width;
+		framebufferInfo.height = swapChainExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(device.getLogicalDevice(), &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create framebuffer!");
+		}
+	}
+}
+
 void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 {
 	swapChainImageViews.resize(swapChainImages.size());
@@ -153,5 +177,51 @@ void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 		if (vkCreateImageView(device.getLogicalDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image views!");
 		}
+	}
+}
+
+void VulkanSwapChain::createSemaphores()
+{
+	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+	VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
+
+	VkSemaphoreCreateInfo semaphoreInfo{};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		if (vkCreateSemaphore(device.getLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+			vkCreateSemaphore(device.getLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(device.getLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+
+			throw std::runtime_error("failed to create semaphores for a frame!");
+		}
+	}
+}
+
+uint32_t VulkanSwapChain::acquireNextImage(int currentFrameIndex)
+{
+	VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
+
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(device.getLogicalDevice(), vkSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrameIndex], VK_NULL_HANDLE, &imageIndex);
+	return imageIndex;
+}
+
+void VulkanSwapChain::destroySwapFrameBuffers(VulkanDevice& device)
+{
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		vkDestroySemaphore(device.getLogicalDevice(), renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(device.getLogicalDevice(), imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(device.getLogicalDevice(), inFlightFences[i], nullptr);
+	}
+	for (auto framebuffer : frameBuffers) {
+		vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
 	}
 }

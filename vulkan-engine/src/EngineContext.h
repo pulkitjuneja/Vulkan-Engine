@@ -3,6 +3,9 @@
 #ifndef ENGINE_CONTEXT_H
 #define ENGINE_CONTEXT_H
 
+#include <Memory>
+#include "Allocator.h"
+
 class Window;
 class VulkanContext;
 
@@ -11,9 +14,9 @@ public:
 	Window* window = nullptr;
 	VulkanContext* vulkanContext;
 
-	static EngineContext* instance;
 	static EngineContext* get();
 private:
+	static EngineContext* instance;
 	EngineContext() = default;
 };
 #endif

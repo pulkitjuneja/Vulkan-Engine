@@ -8,23 +8,35 @@
 #include "VulkanDevice.h"
 #include "EngineContext.h"
 
-class VulkanSwapChain {
-protected:
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
+struct VulkanSwapChain {
+
 	VkSurfaceCapabilitiesKHR capabilities;
-	VkSwapchainKHR swapChain;
+	VkSwapchainKHR vkSwapChain;
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
 
 	std::vector<VkImage> swapChainImages;
-	std::vector<VkImageView> swapChainImageViews;
-public:
+	std::vector<VkImageView> swapChainImageViews; 
+	std::vector<VkFramebuffer> frameBuffers;
+
 	void initialize(const VulkanDevice& device, const VkSurfaceKHR surface);
 	void release(const VulkanDevice& device);
 
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const VulkanDevice& device, const VkSurfaceKHR surface);
 	VkPresentModeKHR chooseSwapPresentMode(const VulkanDevice& device, const VkSurfaceKHR surface);
 	VkExtent2D chooseSwapExtent(const VulkanDevice& device, const VkSurfaceKHR surface);
+	void createFrameBuffers(const VulkanDevice& device, VkRenderPass& renderPass);
 	void createImageViews(const VulkanDevice& device);
+	void createSemaphores();
+	uint32_t acquireNextImage(int currentFrameIndex);
+
+	// NEed this because frame buffers need to be deleted before everything
+	void destroySwapFrameBuffers(VulkanDevice& device);
 
 };
 

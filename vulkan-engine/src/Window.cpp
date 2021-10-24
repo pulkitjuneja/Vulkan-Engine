@@ -22,7 +22,7 @@ void Window::shutdown()
 void Window::display()
 {
     glfwPollEvents();
-    glfwSwapBuffers(window);
+    //glfwSwapBuffers(window);
 }
 
 GLFWwindow* Window::getNativeWindow()
