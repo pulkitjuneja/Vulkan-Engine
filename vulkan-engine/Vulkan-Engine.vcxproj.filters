@@ -26,6 +26,7 @@
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Allocator.h" />
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
+    <ClInclude Include="src\Renderer\BasicPipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -45,5 +46,6 @@
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
+    <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
   </ItemGroup>
 </Project>

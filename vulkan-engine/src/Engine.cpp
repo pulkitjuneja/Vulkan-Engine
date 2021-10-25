@@ -70,9 +70,7 @@ void Engine::start()
 		graphicsContext = std::make_unique<VulkanContext>();
 		EngineContext::get()->vulkanContext = graphicsContext.get();
 		graphicsContext->initialize();
-		pipeline.createDefault();
-		pipeline.createShaderStage("shaders/triangleVert.spv", "shaders/triangleFrag.spv");
-		pipeline.build();
+		pipeline.build("shaders/triangleVert.spv", "shaders/triangleFrag.spv");
 		graphicsContext->getSwapChain().createFrameBuffers(graphicsContext->getDevice(),
 			pipeline.getRenderPass());
 		recordCommandBuffers();

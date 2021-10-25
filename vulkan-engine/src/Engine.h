@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "EngineContext.h"
 #include "Renderer/VulkanContext.h"
-#include "Renderer/StandardPipeline.h"
+#include "Renderer/BasicPipeline.h"
 #include "Renderer/VulkanCommandBuffer.h"
 
 class Engine {
@@ -19,7 +19,7 @@ protected:
 	size_t currentFrame = 0;
 
 	std::vector<VulkanCommandBuffer> screenCommandBUffers;
-	StandardPipeline pipeline;
+	BasicPipeline pipeline;
 
 public:
 	Engine() = default;

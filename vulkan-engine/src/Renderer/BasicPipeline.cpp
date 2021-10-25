@@ -1,11 +1,26 @@
-#include "StandardPipeline.h"
+#include "BasicPipeline.h"
 #include "EngineContext.h"
 #include "VulkanContext.h"
 #include "VulkanSwapChain.h"
 
-void StandardPipeline::createShaderStage(std::string vertPath, std::string fragPath)
+void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath)
 {
-	// TODO: handle conversion to SPIR-V in code
+	// Input assembly creation
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	// Load shaders
+	VkPipelineShaderStageCreateInfo shaderStages[2];
+	VkShaderModule vertexShaderModule;
+	VkShaderModule fragmentShaderModule;
+
 	auto vertShaderCode = readFile(vertPath);
 	auto fragShaderCode = readFile(fragPath);
 
@@ -42,14 +57,43 @@ void StandardPipeline::createShaderStage(std::string vertPath, std::string fragP
 	shaderStages[1].module = fragmentShaderModule;
 	shaderStages[1].pName = "main";
 
-}
 
-void StandardPipeline::addAttachment()
-{
-	VkFormat swapChainImageFormat = EngineContext::get()->vulkanContext->getSwapChain().swapChainImageFormat;
+	// Viewport creation 
+	auto swapChain = EngineContext::get()->vulkanContext->getSwapChain();
 
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)swapChain.swapChainExtent.width;
+	viewport.height = (float)swapChain.swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = swapChain.swapChainExtent;
+
+	VkPipelineViewportStateCreateInfo viewportState{};
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
+	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
+
+	// rasterizer creation
+	VkPipelineRasterizationStateCreateInfo rasterizer{};
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = VK_FALSE;
+	rasterizer.rasterizerDiscardEnable = VK_FALSE;
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.lineWidth = 1.0f;
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.depthBiasEnable = VK_FALSE;
+
+	// create basic attachment
 	VkAttachmentDescription attachment{};
-	attachment.format = swapChainImageFormat;
+	attachment.format = swapChain.swapChainImageFormat;
 	attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -58,32 +102,23 @@ void StandardPipeline::addAttachment()
 	attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	attachments.push_back(attachment);
-}
-
-void StandardPipeline::addSubPass()
-{
+	// Create subpass for the attachment
 	VkAttachmentReference attachmentRef{};
 	attachmentRef.attachment = 0;
 	attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	attachmentRefs.push_back(attachmentRef);
-
 	VkSubpassDescription subpass{};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = attachmentRefs.size();
-	subpass.pColorAttachments = attachmentRefs.data();
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &attachmentRef;
 
-	subPasses.push_back(subpass);
-}
-
-VkPipeline StandardPipeline::build()
-{
+	// create multisampler info
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
+	// create belnd state info
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	colorBlendAttachment.blendEnable = VK_FALSE;
@@ -99,6 +134,7 @@ VkPipeline StandardPipeline::build()
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
 
+	// create subpass dependency for syncing images prior to pipeline
 	VkSubpassDependency dependency{};
 	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependency.dstSubpass = 0;
@@ -107,17 +143,18 @@ VkPipeline StandardPipeline::build()
 	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
+	// Parent render pass info
+	// TODO :  see how this can be parameterized
 	VkRenderPassCreateInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = attachments.size();
-	renderPassInfo.pAttachments = attachments.data();
-	renderPassInfo.subpassCount = subPasses.size();
-	renderPassInfo.pSubpasses = subPasses.data();
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &attachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 
 	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
-
 	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
@@ -131,6 +168,7 @@ VkPipeline StandardPipeline::build()
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
+	// finally create the pipeline
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
@@ -152,11 +190,9 @@ VkPipeline StandardPipeline::build()
 
 	vkDestroyShaderModule(device, fragmentShaderModule, nullptr);
 	vkDestroyShaderModule(device, vertexShaderModule, nullptr);
-
-	return graphicsPipeline;
 }
 
-void StandardPipeline::release()
+void BasicPipeline::release()
 {
 	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
 
@@ -165,61 +201,7 @@ void StandardPipeline::release()
 	vkDestroyRenderPass(device, renderPass, nullptr);
 }
 
-void StandardPipeline::createDefault()
-{
-	createInputAssemblyInfo();
-	createViewPortInfo();
-	createRasterizerInfo();
-	addAttachment();
-	addSubPass();
-}
-
-void StandardPipeline::createInputAssemblyInfo()
-{
-	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-
-	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-	inputAssembly.primitiveRestartEnable = VK_FALSE;
-}
-
-void StandardPipeline::createViewPortInfo()
-{
-	VkExtent2D swapChainExtent = EngineContext::get()->vulkanContext->getSwapChain().swapChainExtent;
-
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)swapChainExtent.width;
-	viewport.height = (float)swapChainExtent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-
-	scissor.offset = { 0, 0 };
-	scissor.extent = swapChainExtent;
-
-	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportState.viewportCount = 1;
-	viewportState.pViewports = &viewport;
-	viewportState.scissorCount = 1;
-	viewportState.pScissors = &scissor;
-}
-
-void StandardPipeline::createRasterizerInfo()
-{
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
-}
-
-
-std::vector<char> StandardPipeline::readFile(std::string filePath)
+std::vector<char> BasicPipeline::readFile(std::string filePath)
 {
 	std::ifstream file(filePath, std::ios::ate | std::ios::binary);
 
