@@ -27,6 +27,15 @@ void VulkanContext::createSurface()
 	}
 }
 
+void VulkanContext::createVMAllocator()
+{
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = device.physicalDevice;
+	allocatorInfo.device = device.logicalDevice;
+	allocatorInfo.instance = instance.vkInstance;
+	vmaCreateAllocator(&allocatorInfo, &allocator);
+}
+
 void VulkanContext::creategraphicsPool() 
 {
 	QueueFamilyIndices queueFamilyIndices = device.findQueueFamilies();

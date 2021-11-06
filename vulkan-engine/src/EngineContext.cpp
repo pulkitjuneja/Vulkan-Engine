@@ -10,3 +10,5 @@ EngineContext* EngineContext::get()
 
 	return instance;
 }
+
+typedef EngineContext EC;

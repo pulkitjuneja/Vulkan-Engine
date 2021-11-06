@@ -3,6 +3,8 @@
 #ifndef VULKAN_CONTEXT_H
 #define VULKAN_CONTEXT_H
 
+#include "vk_mem_alloc.h"
+
 #include "Window.h"
 #include <vector>
 #include "Logger.h"
@@ -11,6 +13,11 @@
 #include "VulkanSwapChain.h"
 #include "VulkanInstance.h"
 
+struct AllocatedBuffer {
+	VkBuffer buffer;
+	VmaAllocation allocation;
+};
+
 class VulkanContext {
 protected:
 	VulkanInstance instance;
@@ -18,6 +25,7 @@ protected:
 	VkSurfaceKHR surface;
 	VulkanSwapChain swapChain;
 	VkCommandPool graphicsCommandPool;
+	VmaAllocator allocator;
 
 public:
 	VulkanContext() = default;
@@ -31,6 +39,7 @@ public:
 	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
 
 	void createSurface();
+	void createVMAllocator();
 	void creategraphicsPool();
 };
 

@@ -61,7 +61,7 @@ void Engine::renderLoop()
 
 void Engine::start()
 {
-	window = std::make_unique<Window>(800, 600, "Vulkan Engine");
+	window = std::make_unique<Window>(1366, 768, "Vulkan Engine");
 	EngineContext::get()->window = window.get();
 
 	isEngineRunning = true;

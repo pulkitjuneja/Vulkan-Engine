@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>VKE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;ext\glm;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;ext\glm;ext\VulkanMemoryAllocator;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -103,12 +103,12 @@
     <ClInclude Include="src\FixedSizeQueue.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Renderer\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\Vertex.h" />
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\VulkanContext.h" />
     <ClInclude Include="src\Renderer\VulkanDevice.h" />
     <ClInclude Include="src\Renderer\VulkanSwapChain.h" />
     <ClInclude Include="src\Renderer\VulkanInstance.h" />
-    <ClInclude Include="src\Renderer\StandardPipeline.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -116,13 +116,13 @@
     <ClCompile Include="src\EngineContext.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
+    <ClCompile Include="src\Renderer\Vertex.cpp" />
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Renderer\VulkanContext.cpp" />
     <ClCompile Include="src\Renderer\VulkanDevice.cpp" />
     <ClCompile Include="src\Renderer\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\Source.cpp" />
-    <ClCompile Include="src\Renderer\StandardPipeline.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

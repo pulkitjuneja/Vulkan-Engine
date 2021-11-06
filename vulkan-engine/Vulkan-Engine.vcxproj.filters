@@ -22,11 +22,11 @@
     <ClInclude Include="src\Renderer\VulkanInstance.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Renderer\StandardPipeline.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Allocator.h" />
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -42,10 +42,10 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Source.cpp" />
-    <ClCompile Include="src\Renderer\StandardPipeline.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
+    <ClCompile Include="src\Renderer\Vertex.cpp" />
   </ItemGroup>
 </Project>

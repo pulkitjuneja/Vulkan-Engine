@@ -2,11 +2,22 @@
 #include "EngineContext.h"
 #include "VulkanContext.h"
 #include "VulkanSwapChain.h"
+#include "Vertex.h"
 
 void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath)
 {
+	//auto bindingDescription = Vertex::getBindingDescription();
+	//auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
 	// Input assembly creation
-	VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
+	//VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
+	//vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	//vertexInputInfo.vertexBindingDescriptionCount = 1;
+	//vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	//vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	//vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.vertexBindingDescriptionCount = 0;
 	vertexInputInfo.vertexAttributeDescriptionCount = 0;
