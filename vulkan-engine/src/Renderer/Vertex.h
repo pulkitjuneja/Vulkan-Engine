@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <array>
 #include <vector>
+#include "vk_mem_alloc.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -18,12 +19,25 @@ struct Vertex {
     static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 };
 
+
+struct AllocatedBuffer {
+    VkBuffer buffer;
+    VmaAllocation allocation;
+};
+
+
 #endif // !VERTEX_H
-//
-//class Mesh {
-//protected:
-//    std::vector<Vertex> vertices;
-//    AllocatedBuffer vertexBuffer;
-//};
+
+class Mesh {
+protected:
+    std::vector<Vertex> vertices;
+    AllocatedBuffer vertexBuffer;
+
+public:
+    Mesh(std::vector<Vertex>&& vertices);
+    VkBuffer& getVBO() { return vertexBuffer.buffer; }
+    int getVertexCount() { return vertices.size(); }
+    void release();
+};
 
  

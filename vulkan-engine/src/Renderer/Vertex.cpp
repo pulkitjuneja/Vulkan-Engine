@@ -1,4 +1,6 @@
 #include "Vertex.h"
+#include "EngineContext.h"
+#include "Renderer/VulkanContext.h"
 
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {
@@ -34,4 +36,33 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
 
         return attributeDescriptions;
     }
+}
+
+Mesh::Mesh(std::vector<Vertex>&& vertices)
+{
+    this->vertices = vertices;
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = vertices.size() * sizeof(Vertex);
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+
+    VmaAllocationCreateInfo vmaallocInfo = {};
+    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+    if (vmaCreateBuffer(alloc, &bufferInfo, &vmaallocInfo, &vertexBuffer.buffer,
+        &vertexBuffer.allocation, nullptr) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create vertex buffer for mesh");
+    }
+
+    void* data;
+    vmaMapMemory(alloc, vertexBuffer.allocation, &data);
+    memcpy(data, vertices.data(), vertices.size() * sizeof(Vertex));
+    vmaUnmapMemory(alloc, vertexBuffer.allocation);
+}
+
+void Mesh::release() {
+    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+    vmaDestroyBuffer(alloc, vertexBuffer.buffer, vertexBuffer.allocation);
 }

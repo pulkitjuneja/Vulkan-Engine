@@ -13,11 +13,6 @@
 #include "VulkanSwapChain.h"
 #include "VulkanInstance.h"
 
-struct AllocatedBuffer {
-	VkBuffer buffer;
-	VmaAllocation allocation;
-};
-
 class VulkanContext {
 protected:
 	VulkanInstance instance;
@@ -25,9 +20,9 @@ protected:
 	VkSurfaceKHR surface;
 	VulkanSwapChain swapChain;
 	VkCommandPool graphicsCommandPool;
-	VmaAllocator allocator;
 
 public:
+	VmaAllocator allocator;
 	VulkanContext() = default;
 	void initialize();
 	void release();

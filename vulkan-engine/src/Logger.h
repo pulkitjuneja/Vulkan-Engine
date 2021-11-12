@@ -7,6 +7,7 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 // TODO: platfrom specific code
 #define NOMINMAX

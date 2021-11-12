@@ -10,6 +10,7 @@
 #include "Renderer/VulkanContext.h"
 #include "Renderer/BasicPipeline.h"
 #include "Renderer/VulkanCommandBuffer.h"
+#include "Renderer/Vertex.h"
 
 class Engine {
 protected:
@@ -19,13 +20,17 @@ protected:
 	size_t currentFrame = 0;
 
 	std::vector<VulkanCommandBuffer> screenCommandBUffers;
+	VulkanCommandBuffer mainCommandBuffer;
 	BasicPipeline pipeline;
+
+	std::vector<Mesh> Scene;
 
 public:
 	Engine() = default;
 	~Engine();
 
-	void recordCommandBuffers();
+	void initCommandBuffer();
+	void initMeshes();
 	void renderLoop();
 	void start();
 };

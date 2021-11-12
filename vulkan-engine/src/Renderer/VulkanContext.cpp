@@ -8,10 +8,12 @@ void VulkanContext::initialize()
 	device.initialize(instance, surface);
 	swapChain.initialize(device, surface);
 	creategraphicsPool();
+	createVMAllocator();
 }
 
 void VulkanContext::release()
 {
+	vmaDestroyAllocator(allocator);
 	vkDestroyCommandPool(device.getLogicalDevice(), graphicsCommandPool, nullptr);
 	swapChain.release(device);
 	//device.release();
@@ -42,6 +44,7 @@ void VulkanContext::creategraphicsPool()
 
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
 	if (vkCreateCommandPool(device.getLogicalDevice(), &poolInfo, nullptr, &graphicsCommandPool) != VK_SUCCESS) {
