@@ -3,6 +3,7 @@
 #include "VulkanContext.h"
 #include "VulkanSwapChain.h"
 #include "Vertex.h"
+#include "Uniforms.h"
 
 void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath)
 {
@@ -169,6 +170,15 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath)
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 0;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
+
+	VkPushConstantRange push_constant;
+	push_constant.offset = 0;
+	push_constant.size = sizeof(PerObjectUniforms);
+	push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	pipelineLayoutInfo.pPushConstantRanges = &push_constant;
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+
 
 	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");

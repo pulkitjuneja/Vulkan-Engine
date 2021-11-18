@@ -27,6 +27,8 @@
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\BasicPipeline.h" />
     <ClInclude Include="src\Renderer\Vertex.h" />
+    <ClInclude Include="src\Scene\Transform.h" />
+    <ClInclude Include="src\Renderer\Uniforms.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -47,5 +49,6 @@
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
     <ClCompile Include="src\Renderer\Vertex.cpp" />
+    <ClCompile Include="src\Scene\Transform.cpp" />
   </ItemGroup>
 </Project>

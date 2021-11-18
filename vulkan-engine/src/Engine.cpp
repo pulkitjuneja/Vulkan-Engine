@@ -1,4 +1,9 @@
 #include "Engine.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include "Renderer/Uniforms.h"
 
 void Engine::initCommandBuffer()
 {
@@ -47,6 +52,25 @@ void Engine::renderLoop()
 	VkDeviceSize offset = 0;
 	vkCmdBindVertexBuffers(screenCommandBUffers[currentFrame].commandBuffer,
 		0, 1, &Scene[0].getVBO(), &offset);
+
+	glm::vec3 camPos = { 0.f,0.f,-2.f };
+
+	glm::mat4 view = glm::lookAt(camPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	//camera projection
+	glm::mat4 projection = glm::perspective(glm::radians(70.f), 1700.f / 900.f, 0.1f, 200.0f);
+	projection[1][1] *= -1;
+	//model rotation
+	glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(0.4f), glm::vec3(0, 1, 0));
+
+	//calculate final mesh matrix
+	glm::mat4 mesh_matrix = projection* view* model;
+
+	PerObjectUniforms constants;
+	constants.modelMatrix = mesh_matrix;
+
+	//upload the matrix to the GPU via push constants
+	vkCmdPushConstants(screenCommandBUffers[currentFrame].commandBuffer,
+		pipeline.getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
 
 	vkCmdDraw(screenCommandBUffers[currentFrame].commandBuffer, Scene[0].getVertexCount(), 1, 0, 0);
 	screenCommandBUffers[currentFrame].endRenderPass();

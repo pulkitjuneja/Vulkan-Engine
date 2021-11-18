@@ -103,12 +103,14 @@
     <ClInclude Include="src\FixedSizeQueue.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Renderer\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\Uniforms.h" />
     <ClInclude Include="src\Renderer\Vertex.h" />
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\VulkanContext.h" />
     <ClInclude Include="src\Renderer\VulkanDevice.h" />
     <ClInclude Include="src\Renderer\VulkanSwapChain.h" />
     <ClInclude Include="src\Renderer\VulkanInstance.h" />
+    <ClInclude Include="src\Scene\Transform.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +124,7 @@
     <ClCompile Include="src\Renderer\VulkanDevice.cpp" />
     <ClCompile Include="src\Renderer\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
+    <ClCompile Include="src\Scene\Transform.cpp" />
     <ClCompile Include="src\Source.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

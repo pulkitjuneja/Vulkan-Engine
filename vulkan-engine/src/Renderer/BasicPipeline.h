@@ -23,6 +23,7 @@ public:
 
 	VkPipeline& getPipeline() { return graphicsPipeline; }
 	VkRenderPass& getRenderPass() { return renderPass; }
+	VkPipelineLayout& getPipelinelayout() { return pipelineLayout; }
 };
 
 
