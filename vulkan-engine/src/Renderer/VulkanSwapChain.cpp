@@ -61,10 +61,25 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	vkGetSwapchainImagesKHR(device.getLogicalDevice(), vkSwapChain, &imageCount, swapChainImages.data());
 
 	createImageViews(device);
+	createScreenRenderPass();
+	createFrameBuffers();
+	initScreenCommandBuffers();
 }
 
 void VulkanSwapChain::release(const VulkanDevice& device)
 {
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		vkDestroySemaphore(device.getLogicalDevice(), renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(device.getLogicalDevice(), imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(device.getLogicalDevice(), inFlightFences[i], nullptr);
+	}
+
+	for (auto framebuffer : frameBuffers) {
+		vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
+	}
+
+	vkDestroyRenderPass(device.getLogicalDevice(), screenRenderPass, nullptr);
+
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(device.getLogicalDevice(), imageView, nullptr);
 	}
@@ -140,7 +155,53 @@ void VulkanSwapChain::initScreenCommandBuffers()
 	}
 }
 
-void VulkanSwapChain::createFrameBuffers(const VulkanDevice& device, VkRenderPass& renderPass)
+void VulkanSwapChain::createScreenRenderPass()
+{
+	VkAttachmentDescription attachment{};
+	attachment.format = swapChainImageFormat;
+	attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	// Create subpass for the attachment
+	VkAttachmentReference attachmentRef{};
+	attachmentRef.attachment = 0;
+	attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &attachmentRef;
+
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &attachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+
+	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
+	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &screenRenderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
+	}
+
+}
+
+void VulkanSwapChain::createFrameBuffers()
 {
 	frameBuffers.resize(swapChainImageViews.size());
 	for (int i = 0; i < swapChainImageViews.size(); i++) {
@@ -150,12 +211,14 @@ void VulkanSwapChain::createFrameBuffers(const VulkanDevice& device, VkRenderPas
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.renderPass = screenRenderPass;
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = attachments;
 		framebufferInfo.width = swapChainExtent.width;
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
+
+		VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
 
 		if (vkCreateFramebuffer(device.getLogicalDevice(), &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create framebuffer!");
@@ -182,6 +245,7 @@ void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 		createInfo.subresourceRange.levelCount = 1;
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
+
 
 		if (vkCreateImageView(device.getLogicalDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image views!");
@@ -221,16 +285,4 @@ uint32_t VulkanSwapChain::acquireNextImage(int currentFrameIndex)
 	uint32_t imageIndex;
 	vkAcquireNextImageKHR(device.getLogicalDevice(), vkSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrameIndex], VK_NULL_HANDLE, &imageIndex);
 	return imageIndex;
-}
-
-void VulkanSwapChain::destroySwapFrameBuffers(VulkanDevice& device)
-{
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		vkDestroySemaphore(device.getLogicalDevice(), renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(device.getLogicalDevice(), imageAvailableSemaphores[i], nullptr);
-		vkDestroyFence(device.getLogicalDevice(), inFlightFences[i], nullptr);
-	}
-	for (auto framebuffer : frameBuffers) {
-		vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
-	}
 }

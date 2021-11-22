@@ -23,12 +23,15 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 
 	for (Entity ent : entities) 
 	{
-		swapChain.screenCommandBUffers[currentFrame].beginRenderPass(ent.pipeline->getRenderPass(),
+		swapChain.screenCommandBUffers[currentFrame].beginRenderPass(swapChain.screenRenderPass,
 			swapChain.frameBuffers[nextImageIndex], swapChainExtents);
 		swapChain.screenCommandBUffers[currentFrame].bindPipeline(ent.pipeline->getPipeline());
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
 			0, 1, &ent.getMesh().getVBO(), &offset);
+
+		vkCmdBindIndexBuffer(swapChain.screenCommandBUffers[currentFrame].commandBuffer, 
+			ent.getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
 
 		glm::vec3 camPos = { 0.f,0.f,-2.f };
 
@@ -49,7 +52,9 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 		vkCmdPushConstants(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
 			ent.pipeline->getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
 
-		vkCmdDraw(swapChain.screenCommandBUffers[currentFrame].commandBuffer, ent.getMesh().getVertexCount(), 1, 0, 0);
+		/*vkCmdDraw(swapChain.screenCommandBUffers[currentFrame].commandBuffer, ent.getMesh().getVertexCount(), 1, 0, 0);*/
+		vkCmdDrawIndexed(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
+			static_cast<uint32_t>(ent.getMesh().getIndices().size()), 1, 0, 0, 0);
 		swapChain.screenCommandBUffers[currentFrame].endRenderPass();
 		swapChain.screenCommandBUffers[currentFrame].end();
 	}

@@ -21,11 +21,8 @@ protected:
 	bool isEngineRunning;
 	size_t currentFrame = 0;
 
-	//std::vector<VulkanCommandBuffer> screenCommandBUffers;
-	//VulkanCommandBuffer mainCommandBuffer;
 	BasicPipeline pipeline;
 
-	//std::vector<Mesh> Scene;
 	Scene scene;
 	SceneRenderer renderer;
 
@@ -33,7 +30,6 @@ public:
 	Engine() = default;
 	~Engine();
 
-	//void initCommandBuffer();
 	void initScene();
 	void renderLoop();
 	void start();

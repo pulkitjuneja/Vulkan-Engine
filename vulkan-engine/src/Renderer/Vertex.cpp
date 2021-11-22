@@ -38,31 +38,50 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
     }
 }
 
-Mesh::Mesh(std::vector<Vertex>&& vertices)
+Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices)
 {
     this->vertices = vertices;
-    VkBufferCreateInfo bufferInfo = {};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = vertices.size() * sizeof(Vertex);
-    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    this->indices = indices;
+
+    vertexBuffer.createBuffer(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU);
+
+    indexBuffer.createBuffer(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU);
 
     VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-
-    VmaAllocationCreateInfo vmaallocInfo = {};
-    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-    if (vmaCreateBuffer(alloc, &bufferInfo, &vmaallocInfo, &vertexBuffer.buffer,
-        &vertexBuffer.allocation, nullptr) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create vertex buffer for mesh");
-    }
 
     void* data;
     vmaMapMemory(alloc, vertexBuffer.allocation, &data);
     memcpy(data, vertices.data(), vertices.size() * sizeof(Vertex));
     vmaUnmapMemory(alloc, vertexBuffer.allocation);
+
+    vmaMapMemory(alloc, indexBuffer.allocation, &data);
+    memcpy(data, indices.data(), indices.size() * sizeof(uint16_t));
+    vmaUnmapMemory(alloc, indexBuffer.allocation);
 }
 
 void Mesh::release() {
     VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+    vmaDestroyBuffer(alloc, indexBuffer.buffer, indexBuffer.allocation);
     vmaDestroyBuffer(alloc, vertexBuffer.buffer, vertexBuffer.allocation);
+}
+
+void AllocatedBuffer::createBuffer(VkDeviceSize bufferSize, 
+    VkBufferUsageFlags usageFlags, VmaMemoryUsage memUsageFlags)
+{
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = bufferSize;
+    bufferInfo.usage = usageFlags;
+
+    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+
+    VmaAllocationCreateInfo vmaallocInfo = {};
+    vmaallocInfo.usage = memUsageFlags;
+
+    if (vmaCreateBuffer(alloc, &bufferInfo, &vmaallocInfo, &buffer,
+        &allocation, nullptr) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create vertex buffer for mesh");
+    }
 }

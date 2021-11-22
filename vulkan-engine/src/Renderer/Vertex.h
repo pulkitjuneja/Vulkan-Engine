@@ -23,6 +23,9 @@ struct Vertex {
 struct AllocatedBuffer {
     VkBuffer buffer;
     VmaAllocation allocation;
+
+    void createBuffer(VkDeviceSize bufferSize,
+        VkBufferUsageFlags usageFlags, VmaMemoryUsage memUsageFlags);
 };
 
 
@@ -31,11 +34,15 @@ struct AllocatedBuffer {
 class Mesh {
 protected:
     std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
     AllocatedBuffer vertexBuffer;
+    AllocatedBuffer indexBuffer;
 
 public:
-    Mesh(std::vector<Vertex>&& vertices);
+    Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices);
     VkBuffer& getVBO() { return vertexBuffer.buffer; }
+    VkBuffer& getEBO() { return indexBuffer.buffer; }
+    std::vector<uint16_t>& getIndices() { return indices; }
     int getVertexCount() { return vertices.size(); }
     void release();
 };

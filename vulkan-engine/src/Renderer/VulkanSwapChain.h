@@ -17,6 +17,8 @@ struct VulkanSwapChain {
 	VkSwapchainKHR vkSwapChain;
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
+	VkRenderPass screenRenderPass;
+
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
@@ -33,16 +35,17 @@ struct VulkanSwapChain {
 	VkPresentModeKHR chooseSwapPresentMode(const VulkanDevice& device, const VkSurfaceKHR surface);
 	VkExtent2D chooseSwapExtent(const VulkanDevice& device, const VkSurfaceKHR surface);
 
-	void initScreenCommandBuffers();
-	void createFrameBuffers(const VulkanDevice& device, VkRenderPass& renderPass);
+	void createScreenRenderPass();
+	void createFrameBuffers();
 	void createImageViews(const VulkanDevice& device);
+	void initScreenCommandBuffers();
 	void createSemaphores();
 
 
 	uint32_t acquireNextImage(int currentFrameIndex);
 
 	// NEed this because frame buffers need to be deleted before everything
-	void destroySwapFrameBuffers(VulkanDevice& device);
+	void destroySwapFrameBuffers();
 
 };
 

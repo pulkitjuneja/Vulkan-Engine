@@ -12,17 +12,15 @@
 class BasicPipeline {
 protected:
 	VkPipeline graphicsPipeline;
-	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
 
 public:
 	std::vector<char> readFile(std::string filePath);
 
-	void build(std::string&& vertPath, std::string&& fragPath);
+	void build(std::string&& vertPath, std::string&& fragPath, VkRenderPass& renderPass);
 	void release();
 
 	VkPipeline& getPipeline() { return graphicsPipeline; }
-	VkRenderPass& getRenderPass() { return renderPass; }
 	VkPipelineLayout& getPipelinelayout() { return pipelineLayout; }
 };
 
