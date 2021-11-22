@@ -19,4 +19,7 @@ private:
 	static EngineContext* instance;
 	EngineContext() = default;
 };
+
+typedef EngineContext EC;
+
 #endif

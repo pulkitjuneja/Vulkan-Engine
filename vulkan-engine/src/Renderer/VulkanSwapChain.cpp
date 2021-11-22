@@ -131,6 +131,15 @@ VkExtent2D VulkanSwapChain::chooseSwapExtent(const VulkanDevice& device, const V
 
 }
 
+void VulkanSwapChain::initScreenCommandBuffers()
+{
+	screenCommandBUffers.resize(MAX_FRAMES_IN_FLIGHT);
+	VkCommandPool graphicsPool = EC::get()->vulkanContext->getGraphicsCommandPool();
+	for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		screenCommandBUffers[i].initialize(graphicsPool);
+	}
+}
+
 void VulkanSwapChain::createFrameBuffers(const VulkanDevice& device, VkRenderPass& renderPass)
 {
 	frameBuffers.resize(swapChainImageViews.size());

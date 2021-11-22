@@ -5,17 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include "Renderer/Uniforms.h"
 
-void Engine::initCommandBuffer()
-{
-	screenCommandBUffers.resize(MAX_FRAMES_IN_FLIGHT);
-	VkCommandPool graphicsPool = graphicsContext->getGraphicsCommandPool();
-	for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		screenCommandBUffers[i].initialize(graphicsPool);
-	}
-	mainCommandBuffer.initialize(graphicsPool);
-}
-
-void Engine::initMeshes()
+void Engine::initScene()
 {
 	std::vector<Vertex> triangleVertices;
 	triangleVertices.resize(3);
@@ -30,82 +20,13 @@ void Engine::initMeshes()
 	triangleVertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
 	triangleVertices[2].color = { 0.f, 0.0f, 1.0f }; //pure green
 
-	Scene.push_back(Mesh(std::move(triangleVertices)));
+	Mesh* triangleMesh = new Mesh(std::move(triangleVertices));
+	scene.createEntity("triangle", triangleMesh).pipeline = &pipeline;
 }
 
 void Engine::renderLoop()
 {
-	auto device = graphicsContext->getDevice();
-	vkWaitForFences(device.getLogicalDevice(), 1, &graphicsContext->getSwapChain().inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(device.getLogicalDevice(), 1, &graphicsContext->getSwapChain().inFlightFences[currentFrame]);
-	uint32_t nextImageIndex = graphicsContext->getSwapChain().acquireNextImage(currentFrame);
-
-	vkResetCommandBuffer(screenCommandBUffers[currentFrame].commandBuffer, 0);
-
-	VkExtent2D swapChainExtents = graphicsContext->getSwapChain().swapChainExtent;
-
-	screenCommandBUffers[currentFrame].begin();
-	screenCommandBUffers[currentFrame].beginRenderPass(pipeline.getRenderPass(),
-		graphicsContext->getSwapChain().frameBuffers[nextImageIndex], swapChainExtents);
-	screenCommandBUffers[currentFrame].bindPipeline(pipeline.getPipeline());
-
-	VkDeviceSize offset = 0;
-	vkCmdBindVertexBuffers(screenCommandBUffers[currentFrame].commandBuffer,
-		0, 1, &Scene[0].getVBO(), &offset);
-
-	glm::vec3 camPos = { 0.f,0.f,-2.f };
-
-	glm::mat4 view = glm::lookAt(camPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	//camera projection
-	glm::mat4 projection = glm::perspective(glm::radians(70.f), 1700.f / 900.f, 0.1f, 200.0f);
-	projection[1][1] *= -1;
-	//model rotation
-	glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(0.4f), glm::vec3(0, 1, 0));
-
-	//calculate final mesh matrix
-	glm::mat4 mesh_matrix = projection* view* model;
-
-	PerObjectUniforms constants;
-	constants.modelMatrix = mesh_matrix;
-
-	//upload the matrix to the GPU via push constants
-	vkCmdPushConstants(screenCommandBUffers[currentFrame].commandBuffer,
-		pipeline.getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
-
-	vkCmdDraw(screenCommandBUffers[currentFrame].commandBuffer, Scene[0].getVertexCount(), 1, 0, 0);
-	screenCommandBUffers[currentFrame].endRenderPass();
-	screenCommandBUffers[currentFrame].end();
-
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.pNext = nullptr;
-//
-	VkSemaphore waitSemaphores[] = {graphicsContext->getSwapChain().imageAvailableSemaphores[currentFrame]};
-	VkSemaphore signalSemaphores[] = { graphicsContext->getSwapChain().renderFinishedSemaphores[currentFrame] };
-
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &screenCommandBUffers[currentFrame].commandBuffer;
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = signalSemaphores;
-//
-	if (vkQueueSubmit(graphicsContext->getDevice().queues.graphicsQueue, 1, &submitInfo, 
-		graphicsContext->getSwapChain().inFlightFences[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("failed to submit draw command buffer!");
-	}
-//
-	VkPresentInfoKHR presentInfo{};
-	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = signalSemaphores;
-	VkSwapchainKHR swapChains[] = { graphicsContext->getSwapChain().vkSwapChain };
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &nextImageIndex;
-	vkQueuePresentKHR(device.queues.presentQueue, &presentInfo);
+	renderer.renderScene(scene, currentFrame);
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -123,7 +44,7 @@ void Engine::start()
 		pipeline.build("shaders/triangleVert.spv", "shaders/triangleFrag.spv");
 		graphicsContext->getSwapChain().createFrameBuffers(graphicsContext->getDevice(),
 			pipeline.getRenderPass());
-		initCommandBuffer();
+		graphicsContext->getSwapChain().initScreenCommandBuffers();
 
 		// See if this can be reorderd
 		graphicsContext->getSwapChain().createSemaphores();
@@ -134,7 +55,7 @@ void Engine::start()
 	}
 
 
-	initMeshes();
+	initScene();
 
 	while (isEngineRunning) {
 		if (glfwWindowShouldClose(window->getNativeWindow())) {
@@ -148,9 +69,7 @@ void Engine::start()
 
 Engine::~Engine()
 {	
-	for (Mesh mesh : Scene) {
-		mesh.release();
-	}
+	scene.release();
 	graphicsContext->getSwapChain().destroySwapFrameBuffers(graphicsContext->getDevice());
 	pipeline.release();
 	graphicsContext->release();

@@ -29,6 +29,9 @@
     <ClInclude Include="src\Renderer\Vertex.h" />
     <ClInclude Include="src\Scene\Transform.h" />
     <ClInclude Include="src\Renderer\Uniforms.h" />
+    <ClInclude Include="src\Scene\Entity.h" />
+    <ClInclude Include="src\Scene\Scene.h" />
+    <ClInclude Include="src\Renderer\SceneRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -50,5 +53,8 @@
     <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
     <ClCompile Include="src\Renderer\Vertex.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
+    <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
+    <ClCompile Include="src\Scene\Entity.cpp" />
   </ItemGroup>
 </Project>
