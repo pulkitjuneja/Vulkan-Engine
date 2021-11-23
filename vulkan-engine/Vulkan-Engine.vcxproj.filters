@@ -32,6 +32,7 @@
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Renderer\SceneRenderer.h" />
+    <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -56,5 +57,6 @@
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
+    <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
   </ItemGroup>
 </Project>

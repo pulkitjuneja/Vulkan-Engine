@@ -13,6 +13,7 @@
 #include "Renderer/Vertex.h"
 #include "Scene/Scene.h"
 #include "Renderer/SceneRenderer.h"
+#include "ResourceManagement/ResourceManager.h"
 
 class Engine {
 protected:
@@ -26,8 +27,11 @@ protected:
 	Scene scene;
 	SceneRenderer renderer;
 
+	StackAllocator mainAllocator;
+	ResourceManager* resourceManager;
+
 public:
-	Engine() = default;
+	Engine();
 	~Engine();
 
 	void initScene();

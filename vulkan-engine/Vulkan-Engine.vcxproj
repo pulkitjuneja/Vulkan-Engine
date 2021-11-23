@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>VKE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;ext\glm;ext\VulkanMemoryAllocator;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;ext\glm;ext\VulkanMemoryAllocator;ext\assimp\include;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -69,8 +69,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.2.182.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.2.182.0\Lib;D:\Projects\Vulkan-Engine\Vulkan-Engine\ext\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -111,6 +111,7 @@
     <ClInclude Include="src\Renderer\VulkanDevice.h" />
     <ClInclude Include="src\Renderer\VulkanSwapChain.h" />
     <ClInclude Include="src\Renderer\VulkanInstance.h" />
+    <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Scene\Transform.h" />
@@ -128,6 +129,7 @@
     <ClCompile Include="src\Renderer\VulkanDevice.cpp" />
     <ClCompile Include="src\Renderer\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
+    <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />

@@ -8,11 +8,15 @@
 
 class Window;
 class VulkanContext;
+class ResourceManager;
+class StackAllocator;
 
 class EngineContext {
 public:
-	Window* window = nullptr;
+	Window* window;
 	VulkanContext* vulkanContext;
+	StackAllocator* mainAllocator;
+	ResourceManager* resourceManager;
 
 	static EngineContext* get();
 private:

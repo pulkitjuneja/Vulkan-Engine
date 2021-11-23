@@ -7,7 +7,7 @@
 
 void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBaseMaterialProperties)
 {
-	std::vector<Entity> entities = scene.getEntities();
+	std::vector<Entity>& entities = scene.getEntities();
 
 	auto device = EC::get()->vulkanContext->getDevice();
 	auto swapChain = EC::get()->vulkanContext->getSwapChain();
@@ -21,40 +21,46 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 
 	swapChain.screenCommandBUffers[currentFrame].begin();
 
-	for (Entity ent : entities) 
+	for (int i = 0 ; i < entities.size(); i++) 
 	{
 		swapChain.screenCommandBUffers[currentFrame].beginRenderPass(swapChain.screenRenderPass,
 			swapChain.frameBuffers[nextImageIndex], swapChainExtents);
-		swapChain.screenCommandBUffers[currentFrame].bindPipeline(ent.pipeline->getPipeline());
+		swapChain.screenCommandBUffers[currentFrame].bindPipeline(entities[i].pipeline->getPipeline());
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
-			0, 1, &ent.getMesh().getVBO(), &offset);
+			0, 1, &entities[i].getMesh().getVBO(), &offset);
 
 		vkCmdBindIndexBuffer(swapChain.screenCommandBUffers[currentFrame].commandBuffer, 
-			ent.getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
+			entities[i].getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
 
 		glm::vec3 camPos = { 0.f,0.f,-2.f };
+
+		glm::vec3 eu0 = entities[i].transform.getEulerAngles();
+
+		entities[i].transform.rotate(glm::vec3(0, 0.0005f, 0));
+
+		glm::vec3 eu = entities[i].transform.getEulerAngles();
 
 		glm::mat4 view = glm::lookAt(camPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		//camera projection
 		glm::mat4 projection = glm::perspective(glm::radians(70.f), 1700.f / 900.f, 0.1f, 200.0f);
 		projection[1][1] *= -1;
-		//model rotation
-		glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(0.4f), glm::vec3(0, 1, 0));
+
+		glm::mat4 modelMatrix = entities[i].transform.getTransformationMatrix();
 
 		//calculate final mesh matrix
-		glm::mat4 mesh_matrix = projection * view * model;
+		glm::mat4 mesh_matrix = projection * view * modelMatrix;
 
 		PerObjectUniforms constants;
 		constants.modelMatrix = mesh_matrix;
 
 		//upload the matrix to the GPU via push constants
 		vkCmdPushConstants(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
-			ent.pipeline->getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
+			entities[i].pipeline->getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
 
 		/*vkCmdDraw(swapChain.screenCommandBUffers[currentFrame].commandBuffer, ent.getMesh().getVertexCount(), 1, 0, 0);*/
 		vkCmdDrawIndexed(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
-			static_cast<uint32_t>(ent.getMesh().getIndices().size()), 1, 0, 0, 0);
+			static_cast<uint32_t>(entities[i].getMesh().getIndices().size()), 1, 0, 0, 0);
 		swapChain.screenCommandBUffers[currentFrame].endRenderPass();
 		swapChain.screenCommandBUffers[currentFrame].end();
 	}

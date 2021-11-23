@@ -15,5 +15,5 @@ layout( push_constant ) uniform constants
 void main()
 {
 	gl_Position = objectUniforms.modelMatrix * vec4(vPosition, 1.0f);
-	fragColor = vColor;
+	fragColor = vNormal;
 }

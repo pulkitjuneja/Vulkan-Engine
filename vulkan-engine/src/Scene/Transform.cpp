@@ -28,9 +28,10 @@ void Transform::increaseScale(glm::vec3  scale)
 	this->scale += scale;
 }
 
-void Transform::rotate(glm::vec3  rotation)
+void Transform::rotate(glm::vec3 rotation)
 {
 	this->eulerAngles += rotation;
+	if (true) {}
 }
 
 void Transform::setRotation(glm::vec3 rotation)
@@ -73,8 +74,8 @@ glm::vec3 Transform::getRightVector()
 
 Transform::Transform()
 {
-	this->position = glm::vec3(0, 0, 0);
 	this->eulerAngles = glm::vec3(0, 0, 0);
+	this->position = glm::vec3(0, 0, 0);
 	this->scale = glm::vec3(1, 1, 1);
 }
 

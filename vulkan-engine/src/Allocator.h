@@ -72,7 +72,10 @@ public:
 		delete[] current;
 	}
 
-	~StackAllocator() {}
+	~StackAllocator() {
+		current = buffer;
+		delete[] current;
+	}
 
 private:
 	std::byte* buffer = nullptr;
@@ -84,7 +87,7 @@ private:
 namespace Mem {
 	template<typename T, typename ...Args>
 	T* Allocate(Args&& ... args) {
-		IAllocator* defaultAllocator = EngineContext::get()->sceneAllocator;
+		IAllocator* defaultAllocator = EngineContext::get()->mainAllocator;
 		void* alloc = defaultAllocator->Alloc(sizeof(T));
 		return new(alloc) T(std::forward<Args>(args)...);
 
@@ -93,7 +96,7 @@ namespace Mem {
 
 	template<typename T, typename ...Args>
 	T* Allocate(StackAllocator* allocator, Args&& ... args) {
-		IAllocator* defaultAllocator = EngineContext::get()->sceneAllocator;
+		IAllocator* defaultAllocator = EngineContext::get()->mainAllocator;
 		void* alloc = defaultAllocator->Alloc(sizeof(T));
 		return new(alloc) T(std::forward<Args>(args)...);
 
