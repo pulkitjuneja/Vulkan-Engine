@@ -7,14 +7,14 @@ void VulkanContext::initialize()
 	createSurface();
 	device.initialize(instance, surface);
 	creategraphicsPool();
-	swapChain.initialize(device, surface);
 	createVMAllocator();
+	swapChain.initialize(device, surface);
 }
 
 void VulkanContext::release()
 {
-	vmaDestroyAllocator(allocator);
 	swapChain.release(device);
+	vmaDestroyAllocator(allocator);
 	vkDestroyCommandPool(device.getLogicalDevice(), graphicsCommandPool, nullptr);
 	//device.release();
 	vkDestroySurfaceKHR(instance.vkInstance,surface, nullptr);

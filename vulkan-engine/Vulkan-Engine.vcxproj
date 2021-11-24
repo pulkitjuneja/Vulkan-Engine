@@ -109,6 +109,7 @@
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\VulkanContext.h" />
     <ClInclude Include="src\Renderer\VulkanDevice.h" />
+    <ClInclude Include="src\Renderer\VulkanHelpers.h" />
     <ClInclude Include="src\Renderer\VulkanSwapChain.h" />
     <ClInclude Include="src\Renderer\VulkanInstance.h" />
     <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
@@ -127,6 +128,7 @@
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Renderer\VulkanContext.cpp" />
     <ClCompile Include="src\Renderer\VulkanDevice.cpp" />
+    <ClCompile Include="src\Renderer\VulkanHelpers.cpp" />
     <ClCompile Include="src\Renderer\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />

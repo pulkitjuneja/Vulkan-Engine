@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <array>
 #include <vector>
+#include "VulkanHelpers.h"
 #include "vk_mem_alloc.h"
 
 struct Vertex {
@@ -18,16 +19,6 @@ struct Vertex {
     static VkVertexInputBindingDescription getBindingDescription();
     static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 };
-
-
-struct AllocatedBuffer {
-    VkBuffer buffer;
-    VmaAllocation allocation;
-
-    void createBuffer(VkDeviceSize bufferSize,
-        VkBufferUsageFlags usageFlags, VmaMemoryUsage memUsageFlags);
-};
-
 
 #endif // !VERTEX_H
 

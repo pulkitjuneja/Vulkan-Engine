@@ -23,6 +23,9 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 
 	for (int i = 0 ; i < entities.size(); i++) 
 	{
+		// move this to scripts
+		entities[i].transform.rotate(glm::vec3(0, 0.0005f, 0));
+
 		swapChain.screenCommandBUffers[currentFrame].beginRenderPass(swapChain.screenRenderPass,
 			swapChain.frameBuffers[nextImageIndex], swapChainExtents);
 		swapChain.screenCommandBUffers[currentFrame].bindPipeline(entities[i].pipeline->getPipeline());
@@ -34,12 +37,6 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 			entities[i].getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
 
 		glm::vec3 camPos = { 0.f,0.f,-2.f };
-
-		glm::vec3 eu0 = entities[i].transform.getEulerAngles();
-
-		entities[i].transform.rotate(glm::vec3(0, 0.0005f, 0));
-
-		glm::vec3 eu = entities[i].transform.getEulerAngles();
 
 		glm::mat4 view = glm::lookAt(camPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		//camera projection

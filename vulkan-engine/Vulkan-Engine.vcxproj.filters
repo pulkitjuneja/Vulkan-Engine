@@ -33,6 +33,7 @@
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
+    <ClInclude Include="src\Renderer\VulkanHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -58,5 +59,6 @@
     <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
+    <ClCompile Include="src\Renderer\VulkanHelpers.cpp" />
   </ItemGroup>
 </Project>

@@ -20,8 +20,11 @@ public:
 	void build(std::string&& vertPath, std::string&& fragPath, VkRenderPass& renderPass);
 	void release();
 
+	VkPipelineDepthStencilStateCreateInfo getDepthStencilCreateInfo(
+		bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp);
 	VkPipeline& getPipeline() { return graphicsPipeline; }
 	VkPipelineLayout& getPipelinelayout() { return pipelineLayout; }
+
 };
 
 

@@ -66,22 +66,3 @@ void Mesh::release() {
     vmaDestroyBuffer(alloc, indexBuffer.buffer, indexBuffer.allocation);
     vmaDestroyBuffer(alloc, vertexBuffer.buffer, vertexBuffer.allocation);
 }
-
-void AllocatedBuffer::createBuffer(VkDeviceSize bufferSize, 
-    VkBufferUsageFlags usageFlags, VmaMemoryUsage memUsageFlags)
-{
-    VkBufferCreateInfo bufferInfo = {};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = bufferSize;
-    bufferInfo.usage = usageFlags;
-
-    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-
-    VmaAllocationCreateInfo vmaallocInfo = {};
-    vmaallocInfo.usage = memUsageFlags;
-
-    if (vmaCreateBuffer(alloc, &bufferInfo, &vmaallocInfo, &buffer,
-        &allocation, nullptr) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create vertex buffer for mesh");
-    }
-}

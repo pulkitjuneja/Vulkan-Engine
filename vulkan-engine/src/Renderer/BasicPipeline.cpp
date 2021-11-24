@@ -95,7 +95,7 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
 	// create multisampler info
@@ -140,6 +140,8 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
+	VkPipelineDepthStencilStateCreateInfo depthStencil = getDepthStencilCreateInfo(true, true, VK_COMPARE_OP_LESS_OR_EQUAL);
+
 	// finally create the pipeline
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -154,6 +156,7 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 	pipelineInfo.layout = pipelineLayout;
 	pipelineInfo.renderPass = renderPass;
 	pipelineInfo.subpass = 0;
+	pipelineInfo.pDepthStencilState = &depthStencil;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
@@ -170,6 +173,23 @@ void BasicPipeline::release()
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+}
+
+VkPipelineDepthStencilStateCreateInfo BasicPipeline::getDepthStencilCreateInfo(bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp)
+{
+	VkPipelineDepthStencilStateCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	info.pNext = nullptr;
+
+	info.depthTestEnable = bDepthTest ? VK_TRUE : VK_FALSE;
+	info.depthWriteEnable = bDepthWrite ? VK_TRUE : VK_FALSE;
+	info.depthCompareOp = bDepthTest ? compareOp : VK_COMPARE_OP_ALWAYS;
+	info.depthBoundsTestEnable = VK_FALSE;
+	info.minDepthBounds = 0.0f; // Optional
+	info.maxDepthBounds = 1.0f; // Optional
+	info.stencilTestEnable = VK_FALSE;
+
+	return info;
 }
 
 std::vector<char> BasicPipeline::readFile(std::string filePath)

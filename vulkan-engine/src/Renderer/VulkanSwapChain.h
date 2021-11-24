@@ -8,6 +8,7 @@
 #include "VulkanDevice.h"
 #include "VulkanCommandBuffer.h"
 #include "EngineContext.h"
+#include "VulkanHelpers.h"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -25,7 +26,9 @@ struct VulkanSwapChain {
 	std::vector<VulkanCommandBuffer> screenCommandBUffers;
 
 	std::vector<VkImage> swapChainImages;
+	AllocatedImage screenDepthBuffer;
 	std::vector<VkImageView> swapChainImageViews; 
+	VkImageView depthBufferImageView;
 	std::vector<VkFramebuffer> frameBuffers;
 
 	void initialize(const VulkanDevice& device, const VkSurfaceKHR surface);
@@ -41,11 +44,7 @@ struct VulkanSwapChain {
 	void initScreenCommandBuffers();
 	void createSemaphores();
 
-
 	uint32_t acquireNextImage(int currentFrameIndex);
-
-	// NEed this because frame buffers need to be deleted before everything
-	void destroySwapFrameBuffers();
 
 };
 

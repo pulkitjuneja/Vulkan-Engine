@@ -90,5 +90,4 @@ ResourceManager::~ResourceManager()
 		pair.second->release();
 	}
 	loadedMeshes.clear();
-
 }
