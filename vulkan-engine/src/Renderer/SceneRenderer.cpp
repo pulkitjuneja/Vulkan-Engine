@@ -7,78 +7,78 @@
 
 void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBaseMaterialProperties)
 {
-	std::vector<Entity>& entities = scene.getEntities();
-
 	auto device = EC::get()->vulkanContext->getDevice();
 	auto swapChain = EC::get()->vulkanContext->getSwapChain();
+	auto allocator = EC::get()->vulkanContext->allocator;
+	std::vector<FrameData>& frames = EC::get()->vulkanContext->frames;
 
-	vkWaitForFences(device.getLogicalDevice(), 1, &swapChain.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(device.getLogicalDevice(), 1, &swapChain.inFlightFences[currentFrame]);
+	vkWaitForFences(device.getLogicalDevice(), 1, &frames[currentFrame].inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(device.getLogicalDevice(), 1, &frames[currentFrame].inFlightFence);
 	uint32_t nextImageIndex = swapChain.acquireNextImage(currentFrame);
 
-	vkResetCommandBuffer(swapChain.screenCommandBUffers[currentFrame].commandBuffer, 0);
+	vkResetCommandBuffer(frames[currentFrame].FrameCommandBuffer.commandBuffer, 0);
 	VkExtent2D swapChainExtents = swapChain.swapChainExtent;
 
-	swapChain.screenCommandBUffers[currentFrame].begin();
+	frames[currentFrame].FrameCommandBuffer.begin();
+	frames[currentFrame].FrameCommandBuffer.beginRenderPass(swapChain.screenRenderPass,
+		swapChain.frameBuffers[nextImageIndex], swapChainExtents);
 
+	PerFrameUniforms uniforms{};
+	uniforms.projectionMatrix = scene.getMainCamera().getProjectionMatrix();
+	uniforms.viewMatrix = scene.getMainCamera().getViewMatrix();
+
+	// update uniform buffers
+	void* data;
+	vmaMapMemory(allocator, frames[currentFrame].frameUniforms.allocation, &data);
+	memcpy(data, &uniforms, sizeof(PerFrameUniforms));
+	vmaUnmapMemory(allocator, frames[currentFrame].frameUniforms.allocation);
+
+	std::vector<Entity>& entities = scene.getEntities();
 	for (int i = 0 ; i < entities.size(); i++) 
 	{
 		// move this to scripts
 		entities[i].transform.rotate(glm::vec3(0, 0.0005f, 0));
 
-		swapChain.screenCommandBUffers[currentFrame].beginRenderPass(swapChain.screenRenderPass,
-			swapChain.frameBuffers[nextImageIndex], swapChainExtents);
-		swapChain.screenCommandBUffers[currentFrame].bindPipeline(entities[i].pipeline->getPipeline());
+		frames[currentFrame].FrameCommandBuffer.bindPipeline(entities[i].pipeline->getPipeline());
+		vkCmdBindDescriptorSets(frames[currentFrame].FrameCommandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			entities[i].pipeline->getPipelinelayout(), 0, 1, &frames[currentFrame].frameDescriptor, 0, nullptr);
+
 		VkDeviceSize offset = 0;
-		vkCmdBindVertexBuffers(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
+		vkCmdBindVertexBuffers(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			0, 1, &entities[i].getMesh().getVBO(), &offset);
 
-		vkCmdBindIndexBuffer(swapChain.screenCommandBUffers[currentFrame].commandBuffer, 
+		vkCmdBindIndexBuffer(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			entities[i].getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
 
-		glm::vec3 camPos = { 0.f,0.f,-2.f };
-
-		glm::mat4 view = glm::lookAt(camPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		//camera projection
-		glm::mat4 projection = glm::perspective(glm::radians(70.f), 1700.f / 900.f, 0.1f, 200.0f);
-		projection[1][1] *= -1;
-
-		glm::mat4 modelMatrix = entities[i].transform.getTransformationMatrix();
-
-		//calculate final mesh matrix
-		glm::mat4 mesh_matrix = projection * view * modelMatrix;
-
 		PerObjectUniforms constants;
-		constants.modelMatrix = mesh_matrix;
+		constants.modelMatrix = entities[i].transform.getTransformationMatrix();
 
-		//upload the matrix to the GPU via push constants
-		vkCmdPushConstants(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
+		vkCmdPushConstants(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			entities[i].pipeline->getPipelinelayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PerObjectUniforms), &constants);
 
-		/*vkCmdDraw(swapChain.screenCommandBUffers[currentFrame].commandBuffer, ent.getMesh().getVertexCount(), 1, 0, 0);*/
-		vkCmdDrawIndexed(swapChain.screenCommandBUffers[currentFrame].commandBuffer,
+		vkCmdDrawIndexed(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			static_cast<uint32_t>(entities[i].getMesh().getIndices().size()), 1, 0, 0, 0);
-		swapChain.screenCommandBUffers[currentFrame].endRenderPass();
-		swapChain.screenCommandBUffers[currentFrame].end();
+		frames[currentFrame].FrameCommandBuffer.endRenderPass();
+		frames[currentFrame].FrameCommandBuffer.end();
 	}
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.pNext = nullptr;
 	//
-	VkSemaphore waitSemaphores[] = { swapChain.imageAvailableSemaphores[currentFrame] };
-	VkSemaphore signalSemaphores[] = { swapChain.renderFinishedSemaphores[currentFrame] };
+	VkSemaphore waitSemaphores[] = { frames[currentFrame].imageAvailableSemaphore };
+	VkSemaphore signalSemaphores[] = { frames[currentFrame].renderFinishedSemaphore };
 
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &swapChain.screenCommandBUffers[currentFrame].commandBuffer;
+	submitInfo.pCommandBuffers = &frames[currentFrame].FrameCommandBuffer.commandBuffer;
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 	//
-	if (vkQueueSubmit(device.queues.graphicsQueue, 1, &submitInfo, swapChain.inFlightFences[currentFrame]) != VK_SUCCESS) {
+	if (vkQueueSubmit(device.queues.graphicsQueue, 1, &submitInfo, frames[currentFrame].inFlightFence) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 

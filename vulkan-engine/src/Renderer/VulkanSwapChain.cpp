@@ -66,17 +66,11 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	createImageViews(device);
 	createScreenRenderPass();
 	createFrameBuffers();
-	initScreenCommandBuffers();
+
 }
 
 void VulkanSwapChain::release(const VulkanDevice& device)
 {
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		vkDestroySemaphore(device.getLogicalDevice(), renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(device.getLogicalDevice(), imageAvailableSemaphores[i], nullptr);
-		vkDestroyFence(device.getLogicalDevice(), inFlightFences[i], nullptr);
-	}
-
 	for (auto framebuffer : frameBuffers) {
 		vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
 	}
@@ -151,15 +145,6 @@ VkExtent2D VulkanSwapChain::chooseSwapExtent(const VulkanDevice& device, const V
 		return actualExtent;
 	}
 
-}
-
-void VulkanSwapChain::initScreenCommandBuffers()
-{
-	screenCommandBUffers.resize(MAX_FRAMES_IN_FLIGHT);
-	VkCommandPool graphicsPool = EC::get()->vulkanContext->getGraphicsCommandPool();
-	for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		screenCommandBUffers[i].initialize(graphicsPool);
-	}
 }
 
 void VulkanSwapChain::createScreenRenderPass()
@@ -273,36 +258,13 @@ void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 	}
 }
 
-void VulkanSwapChain::createSemaphores()
-{
-	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-
-	VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
-
-	VkSemaphoreCreateInfo semaphoreInfo{};
-	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	VkFenceCreateInfo fenceInfo{};
-	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(device.getLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(device.getLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-			vkCreateFence(device.getLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
-
-			throw std::runtime_error("failed to create semaphores for a frame!");
-		}
-	}
-}
-
 uint32_t VulkanSwapChain::acquireNextImage(int currentFrameIndex)
 {
 	VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
+	auto frames = EC::get()->vulkanContext->frames;
 
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device.getLogicalDevice(), vkSwapChain, UINT64_MAX, imageAvailableSemaphores[currentFrameIndex], VK_NULL_HANDLE, &imageIndex);
+	vkAcquireNextImageKHR(device.getLogicalDevice(), vkSwapChain, UINT64_MAX, frames[currentFrameIndex].imageAvailableSemaphore,
+		VK_NULL_HANDLE, &imageIndex);
 	return imageIndex;
 }

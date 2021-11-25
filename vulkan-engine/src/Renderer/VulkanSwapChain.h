@@ -10,8 +10,6 @@
 #include "EngineContext.h"
 #include "VulkanHelpers.h"
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
-
 struct VulkanSwapChain {
 
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -19,11 +17,6 @@ struct VulkanSwapChain {
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
 	VkRenderPass screenRenderPass;
-
-	std::vector<VkSemaphore> imageAvailableSemaphores;
-	std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
-	std::vector<VulkanCommandBuffer> screenCommandBUffers;
 
 	std::vector<VkImage> swapChainImages;
 	AllocatedImage screenDepthBuffer;
@@ -41,8 +34,6 @@ struct VulkanSwapChain {
 	void createScreenRenderPass();
 	void createFrameBuffers();
 	void createImageViews(const VulkanDevice& device);
-	void initScreenCommandBuffers();
-	void createSemaphores();
 
 	uint32_t acquireNextImage(int currentFrameIndex);
 

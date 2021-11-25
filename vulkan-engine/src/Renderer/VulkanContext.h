@@ -13,6 +13,18 @@
 #include "VulkanSwapChain.h"
 #include "VulkanInstance.h"
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
+struct FrameData {
+	VkSemaphore imageAvailableSemaphore;
+	VkSemaphore renderFinishedSemaphore;
+	VulkanCommandBuffer FrameCommandBuffer;
+	VkFence inFlightFence;
+
+	AllocatedBuffer frameUniforms;
+	VkDescriptorSet frameDescriptor;
+};
+
 class VulkanContext {
 protected:
 	VulkanInstance instance;
@@ -23,6 +35,11 @@ protected:
 
 public:
 	VmaAllocator allocator;
+	std::vector<FrameData> frames;
+	//Descriptor layouts
+	VkDescriptorSetLayout frameSetLayout;
+	VkDescriptorPool descriptorPool;
+
 	VulkanContext() = default;
 	void initialize();
 	void release();
@@ -33,6 +50,9 @@ public:
 	VulkanSwapChain& getSwapChain() { return swapChain; }
 	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
 
+	void initializeFrameData();
+	void initDescriptors();
+	void releaseFrameData();
 	void createSurface();
 	void createVMAllocator();
 	void creategraphicsPool();

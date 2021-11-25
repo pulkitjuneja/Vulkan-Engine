@@ -98,6 +98,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Allocator.h" />
+    <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EngineContext.h" />
     <ClInclude Include="src\FixedSizeQueue.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="src\Renderer\VulkanSwapChain.h" />
     <ClInclude Include="src\Renderer\VulkanInstance.h" />
     <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
+    <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Scene\Transform.h" />
@@ -132,6 +134,7 @@
     <ClCompile Include="src\Renderer\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
+    <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />
