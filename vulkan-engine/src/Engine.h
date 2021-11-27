@@ -12,7 +12,7 @@
 #include "Renderer/VulkanCommandBuffer.h"
 #include "Renderer/Vertex.h"
 #include "Scene/Scene.h"
-#include "Renderer/SceneRenderer.h"
+#include "Renderer/ForwardRenderer.h"
 #include "ResourceManagement/ResourceManager.h"
 
 class Engine {
@@ -25,7 +25,7 @@ protected:
 	GraphicsPipeline pipeline;
 
 	Scene scene;
-	SceneRenderer renderer;
+	ForwardRenderer renderer;
 
 	StackAllocator mainAllocator;
 	ResourceManager* resourceManager;

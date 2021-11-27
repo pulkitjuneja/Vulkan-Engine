@@ -10,6 +10,7 @@ class Window;
 class VulkanContext;
 class ResourceManager;
 class StackAllocator;
+class Scene;
 
 class EngineContext {
 public:
@@ -17,6 +18,7 @@ public:
 	VulkanContext* vulkanContext;
 	StackAllocator* mainAllocator;
 	ResourceManager* resourceManager;
+	Scene* scene;
 
 	static EngineContext* get();
 private:

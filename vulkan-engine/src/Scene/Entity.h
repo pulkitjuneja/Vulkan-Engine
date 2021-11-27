@@ -22,7 +22,6 @@ public:
 
 	Mesh& getMesh() { return *mesh; }
 	std::string getName() { return name; }
-	void release();
 };
 
 #endif // ! ENTITY_H

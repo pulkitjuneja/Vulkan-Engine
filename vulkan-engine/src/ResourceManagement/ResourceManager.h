@@ -14,11 +14,16 @@
 class ResourceManager {
 private:
 	std::unordered_map<std::string, Mesh*> loadedMeshes;
+	std::unordered_map<std::string, GraphicsPipeline> loadedPipelines;
 	StackAllocator* resourceAllocator;
 public:
 	ResourceManager();
+	void release();
+
 	Mesh* loadMesh(std::string path, int loaderFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	~ResourceManager();
+	void savePipeline(std::string name, GraphicsPipeline);
+
+	GraphicsPipeline& getPipeline(std::string name);
 };
 
 #endif // !RESOURCEMANAGER_H

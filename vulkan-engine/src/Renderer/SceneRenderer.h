@@ -11,7 +11,7 @@
 
 class SceneRenderer {
 public:
-	void renderScene(Scene& scene, size_t currentFrame, 
+	void renderScene(size_t currentFrame, 
 		bool passBaseMaterialProperties = false);
 };
 

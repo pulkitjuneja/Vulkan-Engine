@@ -10,9 +10,3 @@ Entity::Entity(std::string name)
 {
 	this->name = name;
 }
-
-void Entity::release()
-{
-	// release resources used by this entity
-	mesh->release();
-}

@@ -5,12 +5,15 @@
 #include <glm/gtc/quaternion.hpp>
 #include "Renderer/Uniforms.h"
 
-void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBaseMaterialProperties)
+void SceneRenderer::renderScene(size_t currentFrame, bool passBaseMaterialProperties)
 {
 	auto device = EC::get()->vulkanContext->getDevice();
 	auto swapChain = EC::get()->vulkanContext->getSwapChain();
 	auto allocator = EC::get()->vulkanContext->allocator;
+	auto scene = EC::get()->scene;
+
 	std::vector<FrameData>& frames = EC::get()->vulkanContext->frames;
+
 
 	vkWaitForFences(device.getLogicalDevice(), 1, &frames[currentFrame].inFlightFence, VK_TRUE, UINT64_MAX);
 	vkResetFences(device.getLogicalDevice(), 1, &frames[currentFrame].inFlightFence);
@@ -24,8 +27,8 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 		swapChain.frameBuffers[nextImageIndex], swapChainExtents);
 
 	PerFrameUniforms uniforms{};
-	uniforms.projectionMatrix = scene.getMainCamera().getProjectionMatrix();
-	uniforms.viewMatrix = scene.getMainCamera().getViewMatrix();
+	uniforms.projectionMatrix = scene->getMainCamera().getProjectionMatrix();
+	uniforms.viewMatrix = scene->getMainCamera().getViewMatrix();
 
 	// update uniform buffers
 	void* data;
@@ -33,7 +36,7 @@ void SceneRenderer::renderScene(Scene& scene, size_t currentFrame, bool passBase
 	memcpy(data, &uniforms, sizeof(PerFrameUniforms));
 	vmaUnmapMemory(allocator, frames[currentFrame].frameUniforms.allocation);
 
-	std::vector<Entity>& entities = scene.getEntities();
+	std::vector<Entity>& entities = scene->getEntities();
 	for (int i = 0 ; i < entities.size(); i++) 
 	{
 		// move this to scripts

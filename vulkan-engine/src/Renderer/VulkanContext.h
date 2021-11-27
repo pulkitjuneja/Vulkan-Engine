@@ -36,9 +36,6 @@ protected:
 public:
 	VmaAllocator allocator;
 	std::vector<FrameData> frames;
-	//Descriptor layouts
-	VkDescriptorSetLayout frameSetLayout;
-	VkDescriptorPool descriptorPool;
 
 	VulkanContext() = default;
 	void initialize();
@@ -51,7 +48,6 @@ public:
 	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
 
 	void initializeFrameData();
-	void initDescriptors();
 	void releaseFrameData();
 	void createSurface();
 	void createVMAllocator();

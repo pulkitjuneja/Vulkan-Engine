@@ -2,11 +2,47 @@
 #include "Renderer/VulkanHelpers.h"
 #include "EngineContext.h"
 #include "VulkanContext.h"
+#include "ResourceManagement/ResourceManager.h"
 #include <vector>
 #include "Uniforms.h"
+#include "Pipelines/PipelineBuilder.h"
 
 
 void ForwardRenderer::startup()
+{
+	initDescriptorSets();
+
+	std::vector<VkDescriptorSetLayout> layouts;
+	layouts.push_back(frameSetLayout);
+
+	PipelineBuilder builder;
+	GraphicsPipeline pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
+		setShaderStagesInfo("Assets/shaders/triangleVert.spv", "Assets/shaders/triangleFrag.spv").
+		setViewPortInfo(EC::get()->vulkanContext->getSwapChain().swapChainExtent).
+		setScissor({ 0,0 }, EC::get()->vulkanContext->getSwapChain().swapChainExtent).
+		setRasterizerInfo(VK_POLYGON_MODE_FILL).
+		setMultiSamplingInfo().
+		setPipelineLayout(layouts).
+		DepthStencilCreateInfo(true, true, VK_COMPARE_OP_LESS_OR_EQUAL).
+		build_pipeline(EC::get()->vulkanContext->getSwapChain().screenRenderPass);
+
+	EC::get()->resourceManager->savePipeline("BasePipeine", pipeline);
+}
+
+void ForwardRenderer::shutdown()
+{
+	auto allocator = EC::get()->vulkanContext->allocator;
+	auto& frames = EC::get()->vulkanContext->frames;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		vmaDestroyBuffer(allocator, frames[i].frameUniforms.buffer, frames[i].frameUniforms.allocation);
+	}
+	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	vkDestroyDescriptorSetLayout(device, frameSetLayout, nullptr);
+}
+
+void ForwardRenderer::initDescriptorSets()
 {
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 	auto& frames = EC::get()->vulkanContext->frames;
@@ -66,9 +102,8 @@ void ForwardRenderer::startup()
 	}
 }
 
-void ForwardRenderer::shutdown()
-{
-	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
-	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-	vkDestroyDescriptorSetLayout(device, frameSetLayout, nullptr);
+void ForwardRenderer::update(float deltaTime) {
+
+	sceneRenderer.renderScene(currentFrame);
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

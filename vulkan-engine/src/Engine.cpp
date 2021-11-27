@@ -15,13 +15,13 @@ void Engine::initScene()
 {
 	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
 	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
-	scene.createEntity("triangle", monkeyMesh).pipeline = &pipeline;
+	scene.createEntity("triangle", monkeyMesh).pipeline = &resourceManager->getPipeline("BasePipeine");
 }
 
 void Engine::renderLoop()
 {
-	renderer.renderScene(scene, currentFrame);
-	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	//renderer.renderScene(scene, currentFrame);
+	renderer.update(0);
 }
 
 void Engine::start()
@@ -33,6 +33,7 @@ void Engine::start()
 
 	EC::get()->window = window.get();
 	EC::get()->resourceManager = resourceManager;
+	EC::get()->scene = &scene;
 
 	isEngineRunning = true;
 
@@ -40,32 +41,13 @@ void Engine::start()
 		graphicsContext = std::make_unique<VulkanContext>();
 		EC::get()->vulkanContext = graphicsContext.get();
 		graphicsContext->initialize();
-		//pipeline.build("Assets/shaders/triangleVert.spv", "Assets/shaders/triangleFrag.spv", 
-		//	EngineContext::get()->vulkanContext->getSwapChain().screenRenderPass);
-		std::vector<VkDescriptorSetLayout> layouts;
-		layouts.push_back(EC::get()->vulkanContext->frameSetLayout);
-
-		PipelineBuilder builder;
-		pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
-			setShaderStagesInfo("Assets/shaders/triangleVert.spv", "Assets/shaders/triangleFrag.spv").
-			setViewPortInfo(EC::get()->vulkanContext->getSwapChain().swapChainExtent).
-			setScissor({ 0,0 }, EC::get()->vulkanContext->getSwapChain().swapChainExtent).
-			setRasterizerInfo(VK_POLYGON_MODE_FILL).
-			setMultiSamplingInfo().
-			setPipelineLayout(layouts).
-			DepthStencilCreateInfo(true, true, VK_COMPARE_OP_LESS_OR_EQUAL).
-			build_pipeline(EC::get()->vulkanContext->getSwapChain().screenRenderPass);
-		//BasicPipeline pipeline;
-		//pipeline.build("Assets/shaders/triangleVert.spv", "Assets/shaders/triangleFrag.spv",
-		//		EngineContext::get()->vulkanContext->getSwapChain().screenRenderPass);
-
 	}
 	catch (const std::exception& e) {
 		Logger::logError(e.what());
 		isEngineRunning = false;
 	}
 
-
+	renderer.startup();
 	initScene();
 
 	while (isEngineRunning) {
@@ -80,13 +62,9 @@ void Engine::start()
 
 Engine::~Engine()
 {	
+	renderer.shutdown();
 	scene.release();
-
-	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
-
-	vkDestroyPipeline(device, pipeline.pipeline , nullptr);
-	vkDestroyPipelineLayout(device, pipeline.pipelineLayout, nullptr);
-
+	resourceManager->release();
 	graphicsContext->release();
 	window->shutdown();
 }

@@ -20,9 +20,6 @@ void Scene::setMainCamera(glm::vec3 position, glm::vec3 front, float fov, float 
 }
 
 void Scene::release() {
-	for (Entity ent : Entities) {
-		ent.release();
-	}
 
 	Entities.clear();
 }

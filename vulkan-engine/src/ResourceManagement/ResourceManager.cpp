@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 #include "Logger.h"
 #include "glm/glm.hpp"
+#include "Renderer/VulkanContext.h"
 #include "Allocator.h"
 
 
@@ -84,10 +85,39 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 
 }
 
-ResourceManager::~ResourceManager()
+void ResourceManager::savePipeline(std::string name, GraphicsPipeline pipeline)
 {
+	if (loadedPipelines.find(name) != loadedPipelines.end())
+	{
+		Logger::logWarn("pipeline " + name + " already loaded");
+		return;
+	}
+
+	loadedPipelines.insert(std::make_pair(name, pipeline));
+}
+
+GraphicsPipeline& ResourceManager::getPipeline(std::string name)
+{
+	if (loadedPipelines.find(name) == loadedPipelines.end()) {
+		Logger::logError("Could not find existing pipeline " + name);
+		return GraphicsPipeline{};
+	}
+	return loadedPipelines[name];
+}
+
+void ResourceManager::release()
+{
+	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
+
 	for (auto pair : loadedMeshes) {
 		pair.second->release();
 	}
+
+	for (auto pair : loadedPipelines) {
+		vkDestroyPipeline(device, pair.second.pipeline, nullptr);
+		vkDestroyPipelineLayout(device, pair.second.pipelineLayout, nullptr);
+	}
+
 	loadedMeshes.clear();
+	loadedPipelines.clear();
 }

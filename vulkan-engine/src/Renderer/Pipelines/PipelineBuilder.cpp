@@ -192,8 +192,8 @@ PipelineBuilder& PipelineBuilder::setMultiSamplingInfo()
 PipelineBuilder& PipelineBuilder::setPipelineLayout(std::vector<VkDescriptorSetLayout>& descriptorLayouts)
 {
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;
-	pipelineLayoutInfo.pSetLayouts = &EC::get()->vulkanContext->frameSetLayout;
+	pipelineLayoutInfo.setLayoutCount = descriptorLayouts.size();
+	pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
 	return *this;

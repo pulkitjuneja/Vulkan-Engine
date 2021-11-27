@@ -133,7 +133,7 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 1;
-	pipelineLayoutInfo.pSetLayouts = &EC::get()->vulkanContext->frameSetLayout;
+	//pipelineLayoutInfo.pSetLayouts = &EC::get()->vulkanContext->frameSetLayout;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = &push_constant;
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
