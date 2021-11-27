@@ -7,25 +7,41 @@
 #include <GLFW/glfw3.h>
 #include "vk_mem_alloc.h"
 
+struct GraphicsPipeline {
+    VkPipeline pipeline;
+    VkPipelineLayout pipelineLayout;
+};
 
 struct AllocatedBuffer {
     VkBuffer buffer;
     VmaAllocation allocation;
-
-    void createBuffer(VkDeviceSize bufferSize,
-        VkBufferUsageFlags usageFlags, VmaMemoryUsage memUsageFlags);
 };
 
 struct AllocatedImage {
     VkImage image;
     VmaAllocation allocation;
-
-    void createImage(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent,
-        VmaMemoryUsage memUsageFlags, uint32_t mipLevels = 1, uint32_t arrayLayers = 1);
 };
 
-VkImageViewCreateInfo getImageViewCreateInfo(VkFormat format, VkImage image,
-    VkImageAspectFlags aspectFlags);
+namespace vkInit {
+
+    VkBufferCreateInfo getBufferCreateinfo(VkDeviceSize bufferSize,
+        VkBufferUsageFlags usageFlags);
+
+    VkImageCreateInfo getImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent,
+        uint32_t mipLevels = 1, uint32_t arrayLayers = 1);
+
+    VkImageViewCreateInfo getImageViewCreateInfo(VkFormat format, VkImage image,
+        VkImageAspectFlags aspectFlags);
+
+    VkFramebufferCreateInfo getFrameBufferCreateInfo(VkRenderPass renderPass, VkExtent2D extent, 
+        uint32_t attachmentCount, VkImageView* attachments);
+
+    VkDescriptorSetLayoutBinding getDescripterLayoutBindingInfo(VkDescriptorType type,
+        VkShaderStageFlags stageFlags, uint32_t binding);
+
+    VkWriteDescriptorSet writeDescriptorSet(VkDescriptorType type, VkDescriptorSet dstSet,
+        VkDescriptorBufferInfo* bufferInfo, uint32_t binding);
+}
 
 
 

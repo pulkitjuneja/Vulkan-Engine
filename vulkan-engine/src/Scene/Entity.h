@@ -6,7 +6,7 @@
 #include "Renderer/Vertex.h"
 #include <string>
 #include "Transform.h"
-#include "Renderer/BasicPipeline.h"
+#include "Renderer/Pipelines/BasicPipeline.h"
 
 class Entity {
 protected:
@@ -15,7 +15,7 @@ protected:
 
 public:
 	Transform transform;
-	BasicPipeline* pipeline;
+	GraphicsPipeline* pipeline;
 
 	Entity(std::string name, Mesh* mesh);
 	Entity(std::string name);

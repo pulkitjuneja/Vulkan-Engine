@@ -25,7 +25,7 @@
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Allocator.h" />
     <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
-    <ClInclude Include="src\Renderer\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\Pipelines\BasicPipeline.h" />
     <ClInclude Include="src\Renderer\Vertex.h" />
     <ClInclude Include="src\Scene\Transform.h" />
     <ClInclude Include="src\Renderer\Uniforms.h" />
@@ -36,6 +36,9 @@
     <ClInclude Include="src\Renderer\VulkanHelpers.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Constants.h" />
+    <ClInclude Include="src\System.h" />
+    <ClInclude Include="src\Renderer\Pipelines\PipelineBuilder.h" />
+    <ClInclude Include="src\Renderer\ForwardRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -54,7 +57,7 @@
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
-    <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
+    <ClCompile Include="src\Renderer\Pipelines\BasicPipeline.cpp" />
     <ClCompile Include="src\Renderer\Vertex.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
@@ -63,5 +66,7 @@
     <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
     <ClCompile Include="src\Renderer\VulkanHelpers.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
+    <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp" />
+    <ClCompile Include="src\Renderer\ForwardRenderer.cpp" />
   </ItemGroup>
 </Project>

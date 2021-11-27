@@ -7,6 +7,7 @@
 #include "Uniforms.h"
 #include "EngineContext.h"
 #include "VulkanContext.h"
+#include "System.h"
 
 class SceneRenderer {
 public:

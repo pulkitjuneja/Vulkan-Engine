@@ -103,7 +103,9 @@
     <ClInclude Include="src\EngineContext.h" />
     <ClInclude Include="src\FixedSizeQueue.h" />
     <ClInclude Include="src\Logger.h" />
-    <ClInclude Include="src\Renderer\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\ForwardRenderer.h" />
+    <ClInclude Include="src\Renderer\Pipelines\BasicPipeline.h" />
+    <ClInclude Include="src\Renderer\Pipelines\PipelineBuilder.h" />
     <ClInclude Include="src\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\Renderer\Uniforms.h" />
     <ClInclude Include="src\Renderer\Vertex.h" />
@@ -118,13 +120,16 @@
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Scene\Transform.h" />
+    <ClInclude Include="src\System.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineContext.cpp" />
     <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\Renderer\BasicPipeline.cpp" />
+    <ClCompile Include="src\Renderer\ForwardRenderer.cpp" />
+    <ClCompile Include="src\Renderer\Pipelines\BasicPipeline.cpp" />
+    <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp" />
     <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Renderer\Vertex.cpp" />
     <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />

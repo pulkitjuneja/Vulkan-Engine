@@ -1,9 +1,9 @@
 #include "BasicPipeline.h"
 #include "EngineContext.h"
-#include "VulkanContext.h"
-#include "VulkanSwapChain.h"
-#include "Vertex.h"
-#include "Uniforms.h"
+#include "Renderer/VulkanContext.h"
+#include "Renderer/VulkanSwapChain.h"
+#include "Renderer/Vertex.h"
+#include "Renderer/Uniforms.h"
 
 void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRenderPass& renderPass)
 {
@@ -80,6 +80,8 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 	scissor.offset = { 0, 0 };
 	scissor.extent = swapChain.swapChainExtent;
 
+
+	//DO in build
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
@@ -104,6 +106,7 @@ void BasicPipeline::build(std::string&& vertPath, std::string&& fragPath, VkRend
 	multisampling.sampleShadingEnable = VK_FALSE;
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
+	//Do in Build
 	// create belnd state info
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;

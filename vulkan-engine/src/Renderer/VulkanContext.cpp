@@ -44,7 +44,17 @@ void VulkanContext::initializeFrameData()
 			throw std::runtime_error("failed to create semaphores for a frame!");
 		}
 		frames[i].FrameCommandBuffer.initialize(graphicsCommandPool);
-		frames[i].frameUniforms.createBuffer(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+
+		VkBufferCreateInfo frameUniformsBufferInfo = vkInit::getBufferCreateinfo(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+		VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+        VmaAllocationCreateInfo vmaallocInfo = {};
+        vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+		if (vmaCreateBuffer(alloc, &frameUniformsBufferInfo, &vmaallocInfo, &frames[i].frameUniforms.buffer,
+			&frames[i].frameUniforms.allocation, nullptr) != VK_SUCCESS) {
+			Logger::logError("failed to create Frame uniform buffers");
+		}
 
 		VkDescriptorSetAllocateInfo allocInfo = {};
 		allocInfo.pNext = nullptr;

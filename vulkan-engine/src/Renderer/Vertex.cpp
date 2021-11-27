@@ -1,6 +1,7 @@
 #include "Vertex.h"
 #include "EngineContext.h"
 #include "Renderer/VulkanContext.h"
+#include "Logger.h"
 
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {
@@ -43,13 +44,22 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices)
     this->vertices = vertices;
     this->indices = indices;
 
-    vertexBuffer.createBuffer(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-    indexBuffer.createBuffer(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU);
-
     VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+
+    VkBufferCreateInfo vertexBufferInfo = vkInit::getBufferCreateinfo(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+    VmaAllocationCreateInfo vmaallocInfo = {};
+    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+    if (vmaCreateBuffer(alloc, &vertexBufferInfo, &vmaallocInfo, &vertexBuffer.buffer, &vertexBuffer.allocation, nullptr) != VK_SUCCESS) {
+        Logger::logError("failed to create vertex buffer for mesh");
+    }
+
+    VkBufferCreateInfo indexBufferInfo = vkInit::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+    if (vmaCreateBuffer(alloc, &indexBufferInfo, &vmaallocInfo, &indexBuffer.buffer, &indexBuffer.allocation, nullptr) != VK_SUCCESS) {
+        Logger::logError("failed to create index buffer for mesh");
+    }
 
     void* data;
     vmaMapMemory(alloc, vertexBuffer.allocation, &data);

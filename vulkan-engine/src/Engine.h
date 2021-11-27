@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "EngineContext.h"
 #include "Renderer/VulkanContext.h"
-#include "Renderer/BasicPipeline.h"
+#include "Renderer/Pipelines/BasicPipeline.h"
 #include "Renderer/VulkanCommandBuffer.h"
 #include "Renderer/Vertex.h"
 #include "Scene/Scene.h"
@@ -22,7 +22,7 @@ protected:
 	bool isEngineRunning;
 	size_t currentFrame = 0;
 
-	BasicPipeline pipeline;
+	GraphicsPipeline pipeline;
 
 	Scene scene;
 	SceneRenderer renderer;
