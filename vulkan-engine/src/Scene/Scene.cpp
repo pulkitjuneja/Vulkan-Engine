@@ -19,6 +19,16 @@ void Scene::setMainCamera(glm::vec3 position, glm::vec3 front, float fov, float 
 	this->mainCamera = Mem::Allocate<Camera>(position, front, fov, aspect, nearPlane, farPlane);
 }
 
+DirectionalLight& Scene::createDirectionalLight(glm::vec4 direction, glm::vec4 diffuse, float intensity)
+{
+	DirectionalLight light;
+	light.diffuse = diffuse;
+	light.direction = direction;
+	light.intensity = intensity;
+	this->directionalLight = light;
+	return light;
+}
+
 void Scene::release() {
 
 	Entities.clear();
@@ -27,4 +37,9 @@ void Scene::release() {
 Camera& Scene::getMainCamera()
 {
 	return *mainCamera;
+}
+
+DirectionalLight& Scene::getDirectionalLight()
+{
+	return directionalLight;
 }

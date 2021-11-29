@@ -52,7 +52,7 @@ void ForwardRenderer::initDescriptorSets()
 
 	// Set layout for uniform buffer
 	VkDescriptorSetLayoutBinding frameBufferBinding = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		VK_SHADER_STAGE_VERTEX_BIT, 0);
+		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0);
 	VkDescriptorSetLayoutCreateInfo setInfo = {};
 	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	setInfo.pNext = nullptr;

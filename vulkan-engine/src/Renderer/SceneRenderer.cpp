@@ -75,6 +75,8 @@ void SceneRenderer::updateSceneUniforms(uint32_t currentFrame)
 	PerFrameUniforms uniforms{};
 	uniforms.projectionMatrix = scene->getMainCamera().getProjectionMatrix();
 	uniforms.viewMatrix = scene->getMainCamera().getViewMatrix();
+	uniforms.directionalLight = scene->getDirectionalLight();
+	uniforms.cameraPosition = glm::vec4(scene->getMainCamera().transform.getPosition(), 1.0f);
 
 	void* data;
 	vmaMapMemory(allocator, frames[currentFrame].frameUniforms.allocation, &data);
@@ -86,7 +88,7 @@ void SceneRenderer::updateSceneUniforms(uint32_t currentFrame)
 	PerObjectUniforms* objectSSBO = (PerObjectUniforms*)objectData;
 
 	std::vector<Entity>& entities = scene->getEntities();
-	for (int i = 0; i < entities.size(); i++)
+	for (int i = 0; i < entities.size(); i++)	
 	{
 		objectSSBO[i].modelMatrix = entities[i].transform.getTransformationMatrix();
 	}
