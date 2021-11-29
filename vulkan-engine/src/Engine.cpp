@@ -16,6 +16,9 @@ void Engine::initScene()
 	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
 	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
 	scene.createEntity("triangle", monkeyMesh).pipeline = &resourceManager->getPipeline("BasePipeine");
+	Entity& monke = scene.createEntity("Monke", monkeyMesh);
+	monke.pipeline = &resourceManager->getPipeline("BasePipeine");
+	monke.transform.setPosition(glm::vec3(1, 0, 0));
 }
 
 void Engine::renderLoop()

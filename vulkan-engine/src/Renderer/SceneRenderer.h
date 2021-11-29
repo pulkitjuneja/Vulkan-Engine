@@ -13,6 +13,8 @@ class SceneRenderer {
 public:
 	void renderScene(size_t currentFrame, 
 		bool passBaseMaterialProperties = false);
+
+	void updateSceneUniforms(uint32_t currentFrame);
 };
 
 #endif // !SCENERENDERER_H

@@ -23,6 +23,9 @@ struct FrameData {
 
 	AllocatedBuffer frameUniforms;
 	VkDescriptorSet frameDescriptor;
+
+	AllocatedBuffer objectBuffer;
+	VkDescriptorSet objectDescriptor;
 };
 
 class VulkanContext {

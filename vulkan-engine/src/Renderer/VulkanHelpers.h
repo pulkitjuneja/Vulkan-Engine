@@ -6,6 +6,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "vk_mem_alloc.h"
+#include <vector>
 
 struct GraphicsPipeline {
     VkPipeline pipeline;
@@ -41,6 +42,15 @@ namespace vkInit {
 
     VkWriteDescriptorSet writeDescriptorSet(VkDescriptorType type, VkDescriptorSet dstSet,
         VkDescriptorBufferInfo* bufferInfo, uint32_t binding);
+
+    VkDescriptorSetAllocateInfo getDescriptorAllocInfo(VkDescriptorPool pool, VkDescriptorSetLayout* setLayouts,
+        uint32_t setCount);
+
+    VkSubmitInfo getSubmitInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSemaphore>& signalSemaphores,
+        VkPipelineStageFlags* waitStages, ::std::vector<VkCommandBuffer>& commandBuffers);
+
+    VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
+        uint32_t* nextImageIndices);
 }
 
 

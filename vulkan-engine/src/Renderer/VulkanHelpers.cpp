@@ -87,4 +87,45 @@ namespace vkInit {
 
         return write;
     }
+    VkDescriptorSetAllocateInfo getDescriptorAllocInfo(VkDescriptorPool pool, VkDescriptorSetLayout* setLayouts,
+        uint32_t setCount)
+    {
+        VkDescriptorSetAllocateInfo info = {};
+        info.pNext = nullptr;
+        info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        info.descriptorPool = pool;
+        info.descriptorSetCount = setCount;
+        info.pSetLayouts = setLayouts;
+
+        return info;
+    }
+    VkSubmitInfo getSubmitInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSemaphore>& signalSemaphores, 
+        VkPipelineStageFlags* waitStages, ::std::vector<VkCommandBuffer>& commandBuffers)
+    {
+        VkSubmitInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        info.pNext = nullptr;
+        info.waitSemaphoreCount = waitSemaphores.size();
+        info.pWaitSemaphores = waitSemaphores.data();
+        info.pWaitDstStageMask = waitStages;
+        info.commandBufferCount = commandBuffers.size();
+        info.pCommandBuffers = commandBuffers.data();
+        info.signalSemaphoreCount = signalSemaphores.size();
+        info.pSignalSemaphores = signalSemaphores.data();
+
+        return info;
+    }
+    VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
+        uint32_t* nextImageIndices)
+    {
+        VkPresentInfoKHR info{};
+        info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        info.waitSemaphoreCount = waitSemaphores.size();
+        info.pWaitSemaphores = waitSemaphores.data();
+        info.swapchainCount = swapChains.size();
+        info.pSwapchains = swapChains.data();
+        info.pImageIndices = nextImageIndices;
+
+        return info;
+    }
 }

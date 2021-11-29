@@ -33,13 +33,6 @@ GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 
 	GraphicsPipeline graphicsPipeline{};
 
-	VkPushConstantRange push_constant{};
-	push_constant.offset = 0;
-	push_constant.size = sizeof(PerObjectUniforms);
-	push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-	pipelineLayoutInfo.pPushConstantRanges = &push_constant;
-
 	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &graphicsPipeline.pipelineLayout) != VK_SUCCESS) {
 		Logger::logError("failed to create pipeline layout!");
 	}
@@ -194,7 +187,6 @@ PipelineBuilder& PipelineBuilder::setPipelineLayout(std::vector<VkDescriptorSetL
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = descriptorLayouts.size();
 	pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
-	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
 	return *this;
 }

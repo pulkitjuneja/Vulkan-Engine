@@ -5,14 +5,13 @@
 
 #include "glm/glm.hpp"
 
-struct PerObjectUniforms {
-	glm::vec4 data;
-	glm::mat4 modelMatrix;
-};
-
 struct PerFrameUniforms {
 	glm::mat4 viewMatrix;
 	glm::mat4 projectionMatrix;
+};
+
+struct PerObjectUniforms {
+	glm::mat4 modelMatrix;
 };
 
 #endif // !UNIFORMS_H
