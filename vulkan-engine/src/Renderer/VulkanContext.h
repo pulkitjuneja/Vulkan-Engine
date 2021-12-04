@@ -7,6 +7,7 @@
 
 #include "Window.h"
 #include <vector>
+#include <functional>
 #include "Logger.h"
 #include "VulkanDevice.h"
 #include "EngineContext.h"
@@ -28,6 +29,11 @@ struct FrameData {
 	VkDescriptorSet objectDescriptor;
 };
 
+struct immediateSubmitContext {
+	VkFence fence;
+	VkCommandPool commandPool;
+};
+
 class VulkanContext {
 protected:
 	VulkanInstance instance;
@@ -39,6 +45,7 @@ protected:
 public:
 	VmaAllocator allocator;
 	std::vector<FrameData> frames;
+	immediateSubmitContext context;
 
 	VulkanContext() = default;
 	void initialize();
@@ -49,6 +56,8 @@ public:
 	VkSurfaceKHR& getSurface() { return surface; }
 	VulkanSwapChain& getSwapChain() { return swapChain; }
 	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
+
+	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 	void initializeFrameData();
 	void releaseFrameData();

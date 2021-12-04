@@ -17,13 +17,13 @@ void VulkanCommandBuffer::initialize(VkCommandPool& commandPool)
 	}
 }
 
-void VulkanCommandBuffer::begin()
+void VulkanCommandBuffer::begin(VkCommandBufferUsageFlags flags)
 {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.pNext = nullptr;
 	beginInfo.pInheritanceInfo = nullptr;
-	//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	beginInfo.flags = flags;
 
 	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");

@@ -106,12 +106,12 @@ namespace vkInit {
         info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         info.pNext = nullptr;
         info.waitSemaphoreCount = waitSemaphores.size();
-        info.pWaitSemaphores = waitSemaphores.data();
+        info.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr;
         info.pWaitDstStageMask = waitStages;
         info.commandBufferCount = commandBuffers.size();
         info.pCommandBuffers = commandBuffers.data();
         info.signalSemaphoreCount = signalSemaphores.size();
-        info.pSignalSemaphores = signalSemaphores.data();
+        info.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr;
 
         return info;
     }
@@ -125,6 +125,35 @@ namespace vkInit {
         info.swapchainCount = swapChains.size();
         info.pSwapchains = swapChains.data();
         info.pImageIndices = nextImageIndices;
+
+        return info;
+    }
+    VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range, 
+        VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask)
+    {
+        VkImageMemoryBarrier info = {};
+        info.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+        info.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        info.newLayout = newLayout;
+        info.image = dstImage;
+        info.subresourceRange = range;
+        info.srcAccessMask = srcAccessMask;
+        info.dstAccessMask = dstAccessMask;
+
+        return info;
+    }
+    VkBufferImageCopy getBufferImageCopyInfo(VkImageAspectFlags aspectmask, VkExtent3D extents)
+    {
+        VkBufferImageCopy info = {};
+        info.bufferOffset = 0;
+        info.bufferRowLength = 0;
+        info.bufferImageHeight = 0;
+        info.imageSubresource.aspectMask = aspectmask;
+        info.imageSubresource.mipLevel = 0;
+        info.imageSubresource.baseArrayLayer = 0;
+        info.imageSubresource.layerCount = 1;
+        info.imageExtent = extents;
 
         return info;
     }

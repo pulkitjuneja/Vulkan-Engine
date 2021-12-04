@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>VKE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;ext\glm;ext\VulkanMemoryAllocator;ext\assimp\include;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Projects\Vulkan-Engine\Vulkan-Engine\ext\stbi;src;ext\glm;ext\VulkanMemoryAllocator;ext\assimp\include;ext\glfw\glfw\include;C:\VulkanSDK\1.2.182.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -124,6 +124,7 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ext\stbi\stb_image.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineContext.cpp" />
     <ClCompile Include="src\Logger.cpp" />

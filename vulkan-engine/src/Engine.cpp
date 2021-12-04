@@ -17,6 +17,8 @@ void Engine::initScene()
 	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
 	scene.createDirectionalLight(glm::vec4(-1, -1, 0, 0), glm::vec4(1, 1, 1, 1.0), 5);
 
+	resourceManager->loadTexture("Assets/Textures/crate_1.jpg");
+
 	Entity& monke = scene.createEntity("Monke", monkeyMesh);
 	monke.pipeline = &resourceManager->getPipeline("BasePipeine");
 	monke.transform.setPosition(glm::vec3(3, 0, 3));

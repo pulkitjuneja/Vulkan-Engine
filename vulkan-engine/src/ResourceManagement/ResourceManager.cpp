@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "Renderer/VulkanContext.h"
 #include "Allocator.h"
+#include "stb_image.h"
 
 
 ResourceManager::ResourceManager()
@@ -96,6 +97,79 @@ void ResourceManager::savePipeline(std::string name, GraphicsPipeline pipeline)
 	loadedPipelines.insert(std::make_pair(name, pipeline));
 }
 
+AllocatedImage* ResourceManager::loadTexture(std::string path)
+{
+	auto& allocator = EC::get()->vulkanContext->allocator;
+
+	int texWidth, texHeight, texChannels;
+	stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+	if (!pixels) {
+		Logger::logError("Failed to load texture at path " + path);
+		return nullptr;
+	}
+
+	VkDeviceSize imageSize = texWidth * texHeight * 4;
+	VkFormat image_format = VK_FORMAT_R8G8B8A8_SRGB;
+
+	AllocatedBuffer stagingBuffer; 
+	VkBufferCreateInfo info = vkInit::getBufferCreateinfo(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+	VmaAllocationCreateInfo vmaallocInfo = {};
+	vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+
+	vmaCreateBuffer(allocator, &info, &vmaallocInfo, &stagingBuffer.buffer, &stagingBuffer.allocation, nullptr);
+
+	void* data;
+	vmaMapMemory(allocator, stagingBuffer.allocation, &data);
+	memcpy(data, pixels, static_cast<size_t>(imageSize));
+	vmaUnmapMemory(allocator, stagingBuffer.allocation);
+	stbi_image_free(pixels);
+
+	VkExtent3D imageExtent;
+	imageExtent.width = static_cast<uint32_t>(texWidth);
+	imageExtent.height = static_cast<uint32_t>(texHeight);
+	imageExtent.depth = 1;
+
+	VkImageCreateInfo imgInfo = vkInit::getImageCreateInfo(image_format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, imageExtent);
+	vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+	AllocatedImage newImage{};
+
+	if (vmaCreateImage(allocator, &imgInfo, &vmaallocInfo, &newImage.image, &newImage.allocation, nullptr)) {
+		Logger::logError("Error creating image for texture at " + path);
+	}
+	VulkanContext* gc = EC::get()->vulkanContext;
+
+	gc->immediateSubmit([&](VkCommandBuffer cmd) {
+		VkImageSubresourceRange range;
+		range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		range.baseMipLevel = 0;
+		range.levelCount = 1;
+		range.baseArrayLayer = 0;
+		range.layerCount = 1;
+		VkImageMemoryBarrier imageBarrier_toTransfer = vkInit::getIMageMemoryBarrierInfo(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			newImage.image, range, VK_ACCESS_TRANSFER_WRITE_BIT);
+
+		vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
+			nullptr, 1, &imageBarrier_toTransfer);
+
+		VkBufferImageCopy copyRegion = vkInit::getBufferImageCopyInfo(VK_IMAGE_ASPECT_COLOR_BIT, imageExtent);
+		vkCmdCopyBufferToImage(cmd, stagingBuffer.buffer, newImage.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+		VkImageMemoryBarrier imageBarrier_toReadable = vkInit::getIMageMemoryBarrierInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			newImage.image, range, VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_TRANSFER_WRITE_BIT);
+
+		vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
+			nullptr, 1, &imageBarrier_toReadable);
+	});
+
+	vmaDestroyBuffer(allocator, stagingBuffer.buffer, stagingBuffer.allocation);
+	Logger::logInfo("Texture Loaded " + path);
+	loadedTextures.insert(std::make_pair(path, newImage));
+	return &loadedTextures.find(path)->second;
+}
+
 GraphicsPipeline& ResourceManager::getPipeline(std::string name)
 {
 	if (loadedPipelines.find(name) == loadedPipelines.end()) {
@@ -108,6 +182,11 @@ GraphicsPipeline& ResourceManager::getPipeline(std::string name)
 void ResourceManager::release()
 {
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
+	auto& allocator = EC::get()->vulkanContext->allocator;
+
+	for (auto pair : loadedTextures) {
+		vmaDestroyImage(allocator, pair.second.image, pair.second.allocation);
+	}
 
 	for (auto pair : loadedMeshes) {
 		pair.second->release();

@@ -14,7 +14,7 @@ struct VulkanCommandBuffer {
 
 	void initialize(VkCommandPool& commandPool);
 
-	void begin();
+	void begin(VkCommandBufferUsageFlags flags = 0);
 	void beginRenderPass(VkRenderPass& renderPass, VkFramebuffer& frameBuffer, VkExtent2D& extents);
 	void bindPipeline(VkPipeline& graphicsPipeline);
 	void draw(int vertexCount);

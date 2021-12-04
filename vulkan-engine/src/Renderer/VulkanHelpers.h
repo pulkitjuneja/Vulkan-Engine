@@ -51,6 +51,11 @@ namespace vkInit {
 
     VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
         uint32_t* nextImageIndices);
+
+    VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range,
+        VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask = 0);
+
+    VkBufferImageCopy getBufferImageCopyInfo(VkImageAspectFlags aspectmask, VkExtent3D extents);
 }
 
 

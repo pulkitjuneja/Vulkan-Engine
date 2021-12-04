@@ -68,5 +68,6 @@
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp" />
     <ClCompile Include="src\Renderer\ForwardRenderer.cpp" />
+    <ClCompile Include="ext\stbi\stb_image.cpp" />
   </ItemGroup>
 </Project>
