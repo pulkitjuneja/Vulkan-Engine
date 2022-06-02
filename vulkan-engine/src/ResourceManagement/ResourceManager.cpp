@@ -40,6 +40,13 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 	int runningBaseIndexSum = 0;
 	std::vector<Vertex> vertices;
 	std::vector<uint16_t> indices;
+	std::vector<SubMesh> submeshes;
+
+	submeshes.resize(scene->mNumMaterials == 1 ? 1 : scene->mNumMaterials - 1);
+
+	int currentSubmeshIndex = -1;
+	int currentRunningMaterialIndex = -1;
+	int indexOffset = 0;
 
 	bool hasNormals = true;
 	bool hasTexCoords = true;
@@ -50,6 +57,23 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 	{
 		aiMesh* currentMesh = scene->mMeshes[i];
 
+	if (currentMesh->mMaterialIndex != currentRunningMaterialIndex) {
+			currentRunningMaterialIndex = currentMesh->mMaterialIndex;
+			if (currentSubmeshIndex > -1) {
+				runningBaseIndexSum += submeshes[currentSubmeshIndex].indexCount;
+			}
+			currentSubmeshIndex++;
+			Material material;
+			getAiSceneMaterial(scene, currentRunningMaterialIndex, directory, material);
+			submeshes[currentSubmeshIndex].material = material;
+			submeshes[currentSubmeshIndex].baseVertex = vertexCount;
+			submeshes[currentSubmeshIndex].baseIndex = runningBaseIndexSum;
+			indexOffset = 0;
+		}
+		submeshes[currentSubmeshIndex].indexCount += currentMesh->mNumFaces * 3;
+
+		vertexCount += currentMesh->mNumVertices;
+
 		for (int j = 0; j < currentMesh->mNumVertices; j++)
 		{
 			Vertex vertex;
@@ -59,10 +83,9 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 			if (hasNormals && currentMesh->mNormals != nullptr) {
 				vertex.normal = glm::vec3(currentMesh->mNormals[j].x, currentMesh->mNormals[j].y, currentMesh->mNormals[j].z);
 			}
-			vertex.color = glm::vec3(0.4f, 0.4f, 0.4f);
-			//if (hasTexCoords && currentMesh->mTextureCoords[0]) {
-			//	vertex.texCoords = glm::vec2(currentMesh->mTextureCoords[0][j].x, currentMesh->mTextureCoords[0][j].y);
-			//}
+			if (hasTexCoords && currentMesh->mTextureCoords[0]) {
+				vertex.texCoords = glm::vec2(currentMesh->mTextureCoords[0][j].x, currentMesh->mTextureCoords[0][j].y);
+			}
 			//if (hasTangents && currentMesh->mTangents != nullptr) {
 			//	tangent = glm::vec3(currentMesh->mTangents[j].x, currentMesh->mTangents[j].y, currentMesh->mTangents[j].z);
 			//}
@@ -78,12 +101,34 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 			for (unsigned int k = 0; k < face.mNumIndices; k++)
 				indices.push_back(face.mIndices[k]);
 		}
-		Mesh* newMesh = Mem::Allocate<Mesh>(resourceAllocator, std::move(vertices), std::move(indices));
-		loadedMeshes.insert(make_pair(path, newMesh));
-		Logger::logInfo("Mesh Loaded " + path);
-		return loadedMeshes.find(path)->second;
 	}
 
+	Mesh* newMesh = Mem::Allocate<Mesh>(resourceAllocator, std::move(vertices), std::move(indices), submeshes);
+	loadedMeshes.insert(make_pair(path, newMesh));
+	Logger::logInfo("Mesh Loaded " + path);
+	return loadedMeshes.find(path)->second;
+
+}
+
+void ResourceManager::getAiSceneMaterial(const aiScene* scene, int materialIndex, std::string directory, Material& material)
+{
+	//material.name = std::string(directory);
+	//material.name += "_";
+	//material.name += std::to_string(materialIndex);
+
+	//if (materialIndex >= 0)
+	//{
+	//	//material.setShader(getShader("texturedMeshShader"));
+	//	aiMaterial* aiMaterial = scene->mMaterials[materialIndex];
+	//	material.diffuseMap = loadMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, directory);
+	//	//material.specularMap = loadMaterialTexture(aiMaterial, aiTextureType_SPECULAR, directory);
+	//	//material.normalMap = loadMaterialTexture(aiMaterial, aiTextureType_HEIGHT, directory);
+	//}
+
+	//else
+	//{	
+	//	material.setShader(getShader("defaultShader"));
+	//}
 }
 
 void ResourceManager::savePipeline(std::string name, GraphicsPipeline pipeline)

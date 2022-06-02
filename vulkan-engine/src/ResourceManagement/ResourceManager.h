@@ -23,6 +23,8 @@ public:
 	void release();
 
 	Mesh* loadMesh(std::string path, int loaderFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	void getAiSceneMaterial(const aiScene* scene, int materialIndex, std::string directory, Material& material);
+
 	void savePipeline(std::string name, GraphicsPipeline);
 	AllocatedImage* loadTexture(std::string path);
 

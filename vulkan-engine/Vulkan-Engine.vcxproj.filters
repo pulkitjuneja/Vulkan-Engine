@@ -39,6 +39,7 @@
     <ClInclude Include="src\System.h" />
     <ClInclude Include="src\Renderer\Pipelines\PipelineBuilder.h" />
     <ClInclude Include="src\Renderer\ForwardRenderer.h" />
+    <ClInclude Include="src\Renderer\Material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
