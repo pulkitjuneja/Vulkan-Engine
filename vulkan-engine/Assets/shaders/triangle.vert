@@ -2,11 +2,11 @@
 
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vNormal;
-layout (location = 2) in vec3 vColor;
+layout (location = 2) in vec2 vTexCoords;
 
 layout (location = 0) out VsOut {
 	vec3 vertNormal;
-	vec3 vertColor;
+	vec2 texCoords;
 	vec4 worldPosition;
 }vsOut;
 
@@ -28,7 +28,7 @@ struct PerObjectUniforms{
 	mat4 modelMatrix;
 };
 
-layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer{
+layout(std140, set = 0, binding = 1) readonly buffer ObjectBuffer{
 	PerObjectUniforms objects[];
 } objectBuffer;
 
@@ -37,6 +37,6 @@ void main()
 	mat4 modelMatrix = objectBuffer.objects[gl_BaseInstance].modelMatrix;
 	vsOut.worldPosition = modelMatrix * vec4(vPosition, 1.0f);
 	gl_Position = frameUniforms.projectionMatrix * frameUniforms.viewMatrix * vsOut.worldPosition;
-	vsOut.vertColor = vColor;
-	vsOut.vertNormal = vNormal;
+	vsOut.texCoords = vTexCoords;
+	vsOut.vertNormal = mat3(transpose(inverse(modelMatrix))) * vNormal;
 }

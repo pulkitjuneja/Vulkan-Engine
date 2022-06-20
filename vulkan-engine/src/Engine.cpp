@@ -13,23 +13,19 @@ Engine::Engine() : mainAllocator(1024 * 1024 * 800) {}
 
 void Engine::initScene()
 {
-	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
-	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
-	scene.createDirectionalLight(glm::vec4(-1, -1, 0, 0), glm::vec4(1, 1, 1, 1.0), 5);
+	// Todo : Move default resource initialization to engine specific function
+	resourceManager->loadTexture("Assets/Textures/Default.jpg");
 
-	resourceManager->loadTexture("Assets/Textures/crate_1.jpg");
+	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
+	Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/Crate/Crate1.obj");
+	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
+	scene.createDirectionalLight(glm::vec4(-1, -1, 0, 0), glm::vec4(1, 1, 0, 1.0), 5);
 
 	Entity& monke = scene.createEntity("Monke", monkeyMesh);
-	monke.pipeline = &resourceManager->getPipeline("BasePipeine");
 	monke.transform.setPosition(glm::vec3(3, 0, 3));
 
-	Entity& monke2 = scene.createEntity("triangle", monkeyMesh);
-	monke2.pipeline = &resourceManager->getPipeline("BasePipeine");
-	monke2.transform.setPosition(glm::vec3(0, 0, 2));
-
-	Entity& monke3 = scene.createEntity("Monke3", monkeyMesh);
-	monke3.pipeline = &resourceManager->getPipeline("BasePipeine");
-	monke3.transform.setPosition(glm::vec3(-3, 0, 3));
+	Entity& cube = scene.createEntity("Cube", cubeMesh);
+	cube.transform.setPosition(glm::vec3(0, 0, 3));
 }
 
 void Engine::renderLoop()

@@ -31,9 +31,12 @@ GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 
 	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
 
-	GraphicsPipeline graphicsPipeline{};
+	VkDescriptorSetLayout layouts[2] = { Cache.GlobalUniformLayout, Cache.PerObjectLayout };
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 2;
+	pipelineLayoutInfo.pSetLayouts = layouts;
 
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &graphicsPipeline.pipelineLayout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &Cache.pipelineLayout) != VK_SUCCESS) {
 		Logger::logError("failed to create pipeline layout!");
 	}
 
@@ -47,13 +50,13 @@ GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 	pipelineInfo.pRasterizationState = &rasterizer;
 	pipelineInfo.pMultisampleState = &multisampling;
 	pipelineInfo.pColorBlendState = &colorBlending;
-	pipelineInfo.layout = graphicsPipeline.pipelineLayout;
+	pipelineInfo.layout = Cache.pipelineLayout;
 	pipelineInfo.renderPass = pass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.pDepthStencilState = &depthStencil;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline.pipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &Cache.pipeline) != VK_SUCCESS) {
 		Logger::logError("failed to create graphics pipeline!");
 	}
 
@@ -61,7 +64,7 @@ GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 		vkDestroyShaderModule(device, shaderModule, nullptr);
 	}
 
-	return graphicsPipeline;
+	return Cache;
 }
 
 PipelineBuilder& PipelineBuilder::setVertexInputStateInfo()
@@ -182,11 +185,10 @@ PipelineBuilder& PipelineBuilder::setMultiSamplingInfo()
 	return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setPipelineLayout(std::vector<VkDescriptorSetLayout>& descriptorLayouts)
+PipelineBuilder& PipelineBuilder::setPipelineLayout(VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout PerObjectLayout)
 {
-	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = descriptorLayouts.size();
-	pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
+	Cache.GlobalUniformLayout = globalLayout;
+	Cache.PerObjectLayout = PerObjectLayout;
 
 	return *this;
 }

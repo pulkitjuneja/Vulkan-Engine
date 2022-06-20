@@ -15,7 +15,7 @@ class ResourceManager {
 private:
 	std::unordered_map<std::string, Mesh*> loadedMeshes;
 	std::unordered_map<std::string, GraphicsPipeline> loadedPipelines;
-	std::unordered_map<std::string, AllocatedImage> loadedTextures;
+	std::unordered_map<std::string, Texture> loadedTextures;
 
 	StackAllocator* resourceAllocator;
 public:
@@ -26,9 +26,10 @@ public:
 	void getAiSceneMaterial(const aiScene* scene, int materialIndex, std::string directory, Material& material);
 
 	void savePipeline(std::string name, GraphicsPipeline);
-	AllocatedImage* loadTexture(std::string path);
-
+	Texture* loadTexture(std::string path);
+	Texture* getTexture(std::string path);
 	GraphicsPipeline& getPipeline(std::string name);
+	Texture* loadMaterialTexture(aiMaterial* aiMaterial, aiTextureType aiTextureType, std::string directory);
 };
 
 #endif // !RESOURCEMANAGER_H

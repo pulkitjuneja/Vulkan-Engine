@@ -9,14 +9,13 @@
 #include <GLFW/glfw3.h>
 #include "SceneRenderer.h"
 
-#define MAX_OBJECT_COUNT 10000
+#define MAX_OBJECT_COUNT 1024
 
 class ForwardRenderer : public ISystem {
 protected:
 	VkDescriptorSetLayout frameSetLayout;
 	VkDescriptorSetLayout objectUniformLayout;
 
-	VkDescriptorPool descriptorPool;
 	SceneRenderer sceneRenderer;
 
 	int currentFrame = 0;

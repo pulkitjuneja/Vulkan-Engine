@@ -42,6 +42,7 @@ protected:
 	VulkanSwapChain swapChain;
 	VkCommandPool graphicsCommandPool;
 
+
 public:
 	VmaAllocator allocator;
 	std::vector<FrameData> frames;
@@ -56,6 +57,9 @@ public:
 	VkSurfaceKHR& getSurface() { return surface; }
 	VulkanSwapChain& getSwapChain() { return swapChain; }
 	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
+
+	// main descriptor pool
+	VkDescriptorPool descriptorPool;
 
 	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 

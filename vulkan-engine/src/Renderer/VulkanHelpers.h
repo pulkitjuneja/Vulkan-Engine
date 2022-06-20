@@ -11,6 +11,9 @@
 struct GraphicsPipeline {
     VkPipeline pipeline;
     VkPipelineLayout pipelineLayout;
+
+    VkDescriptorSetLayout GlobalUniformLayout;
+    VkDescriptorSetLayout PerObjectLayout;
 };
 
 struct AllocatedBuffer {
@@ -21,6 +24,12 @@ struct AllocatedBuffer {
 struct AllocatedImage {
     VkImage image;
     VmaAllocation allocation;
+};
+
+struct Texture {
+    AllocatedImage image;
+    VkSampler sampler;
+    VkImageView view;
 };
 
 namespace vkInit {
@@ -52,8 +61,12 @@ namespace vkInit {
     VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
         uint32_t* nextImageIndices);
 
-    VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range,
-        VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask = 0);
+    //VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range,
+    //    VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask = 0);
+
+    VkImageMemoryBarrier getImageTransitionInfo(VkImage dstImage, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageSubresourceRange range, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask);
+
+    VkSamplerCreateInfo getSamplerCreateInfo(VkFilter filters, VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
     VkBufferImageCopy getBufferImageCopyInfo(VkImageAspectFlags aspectmask, VkExtent3D extents);
 }

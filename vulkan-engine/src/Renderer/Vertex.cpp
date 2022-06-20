@@ -17,7 +17,6 @@ VkVertexInputBindingDescription Vertex::getBindingDescription()
 
 std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescriptions()
 {
-    {
         std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
 
         attributeDescriptions[0].binding = 0;
@@ -32,11 +31,10 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
 
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R16G16_SFLOAT;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[2].offset = offsetof(Vertex, texCoords);
 
         return attributeDescriptions;
-    }
 }
 
 Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<SubMesh> subMeshes)
@@ -77,13 +75,6 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std:
         vkCmdCopyBuffer(cmd, stagingBuffer.buffer, vertexBuffer.buffer, 1, &copy);
         });
     vmaDestroyBuffer(alloc, stagingBuffer.buffer, stagingBuffer.allocation);
-
-    //VkBufferCreateInfo indexBufferInfo = vkInit::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-    //vmaallocInfo = {};
-    //vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-    //if (vmaCreateBuffer(alloc, &indexBufferInfo, &vmaallocInfo, &indexBuffer.buffer, &indexBuffer.allocation, nullptr) != VK_SUCCESS) {
-    //    Logger::logError("failed to create index buffer for mesh");
-    //}
 
     //create staging buffer for indices
     stagingBuferInfo = vkInit::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);

@@ -32,7 +32,6 @@ class Mesh {
 protected:
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
-    std::vector<SubMesh> subMeshes;
     AllocatedBuffer vertexBuffer;
     AllocatedBuffer indexBuffer;
 
@@ -40,6 +39,7 @@ public:
     Mesh(std::vector<Vertex>&& vertices, 
         std::vector<uint16_t>&& indices,
         std::vector<SubMesh> subMeshes);
+    std::vector<SubMesh> subMeshes;
     VkBuffer& getVBO() { return vertexBuffer.buffer; }
     VkBuffer& getEBO() { return indexBuffer.buffer; }
     std::vector<uint16_t>& getIndices() { return indices; }

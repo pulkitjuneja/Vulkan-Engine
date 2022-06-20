@@ -112,23 +112,26 @@ Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 
 void ResourceManager::getAiSceneMaterial(const aiScene* scene, int materialIndex, std::string directory, Material& material)
 {
-	//material.name = std::string(directory);
-	//material.name += "_";
-	//material.name += std::to_string(materialIndex);
+	material.name = std::string(directory);
+	material.name += "_";
+	material.name += std::to_string(materialIndex);
 
-	//if (materialIndex >= 0)
-	//{
-	//	//material.setShader(getShader("texturedMeshShader"));
-	//	aiMaterial* aiMaterial = scene->mMaterials[materialIndex];
-	//	material.diffuseMap = loadMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, directory);
-	//	//material.specularMap = loadMaterialTexture(aiMaterial, aiTextureType_SPECULAR, directory);
-	//	//material.normalMap = loadMaterialTexture(aiMaterial, aiTextureType_HEIGHT, directory);
-	//}
+	if (materialIndex >= 0)
+	{
+		material.pipeline = &getPipeline("BasePipeine");
+		aiMaterial* aiMaterial = scene->mMaterials[materialIndex];
+		Texture* diffuseMap = loadMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, directory);
+		if (diffuseMap != NULL) {
+			material.setDiffuseTexture(diffuseMap);
+		}
+		//material.specularMap = loadMaterialTexture(aiMaterial, aiTextureType_SPECULAR, directory);
+		//material.normalMap = loadMaterialTexture(aiMaterial, aiTextureType_HEIGHT, directory);
+	}
 
-	//else
-	//{	
-	//	material.setShader(getShader("defaultShader"));
-	//}
+	else
+	{	
+		material.pipeline = &getPipeline("BasePipeine");
+	}
 }
 
 void ResourceManager::savePipeline(std::string name, GraphicsPipeline pipeline)
@@ -142,13 +145,13 @@ void ResourceManager::savePipeline(std::string name, GraphicsPipeline pipeline)
 	loadedPipelines.insert(std::make_pair(name, pipeline));
 }
 
-AllocatedImage* ResourceManager::loadTexture(std::string path)
+Texture* ResourceManager::loadTexture(std::string path)
 {
 	auto& allocator = EC::get()->vulkanContext->allocator;
+	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-
 	if (!pixels) {
 		Logger::logError("Failed to load texture at path " + path);
 		return nullptr;
@@ -179,9 +182,9 @@ AllocatedImage* ResourceManager::loadTexture(std::string path)
 	VkImageCreateInfo imgInfo = vkInit::getImageCreateInfo(image_format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, imageExtent);
 	vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
-	AllocatedImage newImage{};
+	Texture texture{};
 
-	if (vmaCreateImage(allocator, &imgInfo, &vmaallocInfo, &newImage.image, &newImage.allocation, nullptr)) {
+	if (vmaCreateImage(allocator, &imgInfo, &vmaallocInfo, &texture.image.image, &texture.image.allocation, nullptr)) {
 		Logger::logError("Error creating image for texture at " + path);
 	}
 	VulkanContext* gc = EC::get()->vulkanContext;
@@ -193,26 +196,37 @@ AllocatedImage* ResourceManager::loadTexture(std::string path)
 		range.levelCount = 1;
 		range.baseArrayLayer = 0;
 		range.layerCount = 1;
-		VkImageMemoryBarrier imageBarrier_toTransfer = vkInit::getIMageMemoryBarrierInfo(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			newImage.image, range, VK_ACCESS_TRANSFER_WRITE_BIT);
+		VkImageMemoryBarrier imageBarrier_toTransfer = vkInit::getImageTransitionInfo(texture.image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, range, 0, VK_ACCESS_TRANSFER_WRITE_BIT);
 
-		vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
-			nullptr, 1, &imageBarrier_toTransfer);
+		vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier_toTransfer);
 
 		VkBufferImageCopy copyRegion = vkInit::getBufferImageCopyInfo(VK_IMAGE_ASPECT_COLOR_BIT, imageExtent);
-		vkCmdCopyBufferToImage(cmd, stagingBuffer.buffer, newImage.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+		vkCmdCopyBufferToImage(cmd, stagingBuffer.buffer, texture.image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
-		VkImageMemoryBarrier imageBarrier_toReadable = vkInit::getIMageMemoryBarrierInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			newImage.image, range, VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_TRANSFER_WRITE_BIT);
+		VkImageMemoryBarrier imageBarrier_toReadable = vkInit::getImageTransitionInfo(texture.image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, range, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
 
 		vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
 			nullptr, 1, &imageBarrier_toReadable);
 	});
 
+	VkImageViewCreateInfo Viewinfo = vkInit::getImageViewCreateInfo(image_format, texture.image.image, VK_IMAGE_ASPECT_COLOR_BIT);
+	vkCreateImageView(device, &Viewinfo, nullptr, &texture.view);
+	VkSamplerCreateInfo samplerInfo = vkInit::getSamplerCreateInfo(VK_FILTER_NEAREST);
+	vkCreateSampler(device, &samplerInfo, nullptr, &texture.sampler);
+
 	vmaDestroyBuffer(allocator, stagingBuffer.buffer, stagingBuffer.allocation);
 	Logger::logInfo("Texture Loaded " + path);
-	loadedTextures.insert(std::make_pair(path, newImage));
+	loadedTextures.insert(std::make_pair(path, texture));
 	return &loadedTextures.find(path)->second;
+}
+
+Texture* ResourceManager::getTexture(std::string path)
+{
+	if (loadedTextures.find(path) == loadedTextures.end()) {
+		Logger::logError("Texture" + path + "Not found");
+		return NULL;
+	}
+	return &loadedTextures[path];
 }
 
 GraphicsPipeline& ResourceManager::getPipeline(std::string name)
@@ -224,13 +238,28 @@ GraphicsPipeline& ResourceManager::getPipeline(std::string name)
 	return loadedPipelines[name];
 }
 
+Texture* ResourceManager::loadMaterialTexture(aiMaterial* aiMaterial, aiTextureType aiTextureType, std::string directory)
+{
+	aiString texturePath;
+	if (aiMaterial->GetTextureCount(aiTextureType) > 0) {
+		aiMaterial->GetTexture(aiTextureType, 0, &texturePath);
+		//TextureType textureType = textureTypeMap[aiTextureType];
+		std::string path = directory + "/" + texturePath.C_Str();
+		Texture* tex = loadTexture(path);
+		return tex;
+	}
+	else {
+		return NULL;
+	}
+}
+
 void ResourceManager::release()
 {
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 	auto& allocator = EC::get()->vulkanContext->allocator;
 
 	for (auto pair : loadedTextures) {
-		vmaDestroyImage(allocator, pair.second.image, pair.second.allocation);
+		vmaDestroyImage(allocator, pair.second.image.image, pair.second.image.allocation);
 	}
 
 	for (auto pair : loadedMeshes) {

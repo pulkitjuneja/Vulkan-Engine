@@ -24,22 +24,37 @@
     </ClInclude>
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Allocator.h" />
-    <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
-    <ClInclude Include="src\Renderer\Pipelines\BasicPipeline.h" />
-    <ClInclude Include="src\Renderer\Vertex.h" />
     <ClInclude Include="src\Scene\Transform.h" />
-    <ClInclude Include="src\Renderer\Uniforms.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
-    <ClInclude Include="src\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
-    <ClInclude Include="src\Renderer\VulkanHelpers.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\System.h" />
-    <ClInclude Include="src\Renderer\Pipelines\PipelineBuilder.h" />
-    <ClInclude Include="src\Renderer\ForwardRenderer.h" />
-    <ClInclude Include="src\Renderer\Material.h" />
+    <ClInclude Include="src\Renderer\ForwardRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\Material.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\Pipelines\PipelineBuilder.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\SceneRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\Vertex.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\Uniforms.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\VulkanCommandBuffer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\VulkanHelpers.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
@@ -56,19 +71,35 @@
     </ClCompile>
     <ClCompile Include="src\Source.cpp" />
     <ClCompile Include="src\Window.cpp" />
-    <ClCompile Include="src\Renderer\VulkanInstance.cpp" />
-    <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
-    <ClCompile Include="src\Renderer\Pipelines\BasicPipeline.cpp" />
-    <ClCompile Include="src\Renderer\Vertex.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
-    <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\ResourceManagement\ResourceManager.cpp" />
-    <ClCompile Include="src\Renderer\VulkanHelpers.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
-    <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp" />
-    <ClCompile Include="src\Renderer\ForwardRenderer.cpp" />
     <ClCompile Include="ext\stbi\stb_image.cpp" />
+    <ClCompile Include="src\Renderer\ForwardRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\Material.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\SceneRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\Vertex.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\VulkanHelpers.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\VulkanInstance.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

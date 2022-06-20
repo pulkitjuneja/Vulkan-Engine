@@ -4,17 +4,19 @@
 #define MATERIAL_H
 
 #include "VulkanHelpers.h"
+#include "VulkanContext.h"
 #include <string>
 
 struct Material {
 
 	std::string name;
 	GraphicsPipeline* pipeline;
-	AllocatedImage* diffuseMap;
+	Texture* diffuseMap;
+	bool needsUpdate;
+	VkDescriptorSet MaterialDescriptorSet[MAX_FRAMES_IN_FLIGHT];
 
-	Material() {
-		diffuseMap = nullptr;
-	}
+	Material();
+	void setDiffuseTexture(Texture* diffuseMap);
 };
 
 

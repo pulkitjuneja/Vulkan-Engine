@@ -128,18 +128,47 @@ namespace vkInit {
 
         return info;
     }
-    VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range, 
-        VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask)
+    //VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range, 
+    //    VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask)
+    //{
+    //    VkImageMemoryBarrier info = {};
+    //    info.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+    //    info.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    //    info.newLayout = newLayout;
+    //    info.image = dstImage;  
+    //    info.subresourceRange = range;
+    //    info.srcAccessMask = srcAccessMask;
+    //    info.dstAccessMask = dstAccessMask;
+
+    //    return info;
+    //}
+
+    VkImageMemoryBarrier getImageTransitionInfo(VkImage dstImage, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageSubresourceRange range, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask)
     {
         VkImageMemoryBarrier info = {};
         info.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
-        info.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        info.oldLayout = oldLayout;
         info.newLayout = newLayout;
         info.image = dstImage;
         info.subresourceRange = range;
         info.srcAccessMask = srcAccessMask;
         info.dstAccessMask = dstAccessMask;
+
+        return info;
+    }
+    VkSamplerCreateInfo getSamplerCreateInfo(VkFilter filters, VkSamplerAddressMode samplerAddressMode)
+    {
+        VkSamplerCreateInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        info.pNext = nullptr;
+
+        info.magFilter = filters;
+        info.minFilter = filters;
+        info.addressModeU = samplerAddressMode;
+        info.addressModeV = samplerAddressMode;
+        info.addressModeW = samplerAddressMode;
 
         return info;
     }

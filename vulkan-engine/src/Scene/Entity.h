@@ -15,7 +15,6 @@ protected:
 
 public:
 	Transform transform;
-	GraphicsPipeline* pipeline;
 
 	Entity(std::string name, Mesh* mesh);
 	Entity(std::string name);

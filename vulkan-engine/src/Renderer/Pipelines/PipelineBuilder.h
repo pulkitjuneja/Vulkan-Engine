@@ -28,6 +28,8 @@ public:
 	VkVertexInputBindingDescription bindingDescription {};
 	std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions {};
 
+	GraphicsPipeline Cache;
+
 	PipelineBuilder& setVertexInputStateInfo();
 	PipelineBuilder& setPipelineInputAssemblyStateInfo(VkPrimitiveTopology topology);
 	//TODO: PArameterize it further to take an array of modules and stage flags. Move loader to Resource manager
@@ -36,7 +38,7 @@ public:
 	PipelineBuilder& setScissor(VkOffset2D offset, VkExtent2D& extents);
 	PipelineBuilder& setRasterizerInfo(VkPolygonMode polygonMode);
 	PipelineBuilder& setMultiSamplingInfo();
-	PipelineBuilder& setPipelineLayout(std::vector<VkDescriptorSetLayout>& descriptorLayouts);
+	PipelineBuilder& setPipelineLayout(VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout PerObjectLayout);
 	PipelineBuilder& DepthStencilCreateInfo(bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp);
 	GraphicsPipeline build_pipeline(VkRenderPass pass);
 

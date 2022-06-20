@@ -29,19 +29,18 @@ void SceneRenderer::renderScene(size_t currentFrame, bool passBaseMaterialProper
 		// move this to scripts
 		entities[i].transform.rotate(glm::vec3(0, 0.0005f, 0));
 
-		frames[currentFrame].FrameCommandBuffer.bindPipeline(entities[i].pipeline->pipeline);
-		vkCmdBindDescriptorSets(frames[currentFrame].FrameCommandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			entities[i].pipeline->pipelineLayout, 0, 1, &frames[currentFrame].frameDescriptor, 0, nullptr);
-
-		vkCmdBindDescriptorSets(frames[currentFrame].FrameCommandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			entities[i].pipeline->pipelineLayout, 1, 1, &frames[currentFrame].objectDescriptor, 0, nullptr);
-
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			0, 1, &entities[i].getMesh().getVBO(), &offset);
 
 		vkCmdBindIndexBuffer(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			entities[i].getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
+
+		frames[currentFrame].FrameCommandBuffer.bindPipeline(entities[i].getMesh().subMeshes[0].material.pipeline->pipeline);
+
+		vkCmdBindDescriptorSets(frames[currentFrame].FrameCommandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, entities[i].getMesh().subMeshes[0].material.pipeline->pipelineLayout, 0, 1, &frames[currentFrame].frameDescriptor, 0, nullptr);
+
+		vkCmdBindDescriptorSets(frames[currentFrame].FrameCommandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, entities[i].getMesh().subMeshes[0].material.pipeline->pipelineLayout, 1, 1, &entities[i].getMesh().subMeshes[0].material.MaterialDescriptorSet[currentFrame], 0, nullptr);
 
 		vkCmdDrawIndexed(frames[currentFrame].FrameCommandBuffer.commandBuffer,
 			static_cast<uint32_t>(entities[i].getMesh().getIndices().size()), 1, 0, 0, i);

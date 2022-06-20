@@ -14,7 +14,6 @@ void ForwardRenderer::startup()
 
 	std::vector<VkDescriptorSetLayout> layouts;
 	layouts.push_back(frameSetLayout);
-	layouts.push_back(objectUniformLayout);
 
 	PipelineBuilder builder;
 	GraphicsPipeline pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
@@ -23,7 +22,7 @@ void ForwardRenderer::startup()
 		setScissor({ 0,0 }, EC::get()->vulkanContext->getSwapChain().swapChainExtent).
 		setRasterizerInfo(VK_POLYGON_MODE_FILL).
 		setMultiSamplingInfo().
-		setPipelineLayout(layouts).
+		setPipelineLayout(frameSetLayout, objectUniformLayout).
 		DepthStencilCreateInfo(true, true, VK_COMPARE_OP_LESS_OR_EQUAL).
 		build_pipeline(EC::get()->vulkanContext->getSwapChain().screenRenderPass);
 
@@ -40,9 +39,8 @@ void ForwardRenderer::shutdown()
 		vmaDestroyBuffer(allocator, frames[i].frameUniforms.buffer, frames[i].frameUniforms.allocation);
 	}
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
-	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	vkDestroyDescriptorPool(device, EC::get()->vulkanContext->descriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(device, frameSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device, objectUniformLayout, nullptr);
 }
 
 void ForwardRenderer::initDescriptorSets()
@@ -51,31 +49,36 @@ void ForwardRenderer::initDescriptorSets()
 	auto& frames = EC::get()->vulkanContext->frames;
 
 	// Set layout for uniform buffer
-	VkDescriptorSetLayoutBinding frameBufferBinding = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+	VkDescriptorSetLayoutBinding layoutBindings[2];
+	layoutBindings[0] = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0);
+
+	layoutBindings[1] = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		VK_SHADER_STAGE_VERTEX_BIT, 1);
+
 	VkDescriptorSetLayoutCreateInfo setInfo = {};
 	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	setInfo.pNext = nullptr;
-	setInfo.bindingCount = 1;
+	setInfo.bindingCount = 2;
 	setInfo.flags = 0;
-	setInfo.pBindings = &frameBufferBinding;
-
+	setInfo.pBindings = layoutBindings;
 	vkCreateDescriptorSetLayout(device, &setInfo, nullptr, &frameSetLayout);
 
-	// Set layout for object buffer
-	VkDescriptorSetLayoutBinding objectBind = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
-		VK_SHADER_STAGE_VERTEX_BIT, 0);
+	VkDescriptorSetLayoutBinding textureBinding = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
+
+	setInfo = {};
 	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	setInfo.pNext = nullptr;
 	setInfo.bindingCount = 1;
 	setInfo.flags = 0;
-	setInfo.pBindings = &objectBind;
-
+	setInfo.pBindings = &textureBinding;
 	vkCreateDescriptorSetLayout(device, &setInfo, nullptr, &objectUniformLayout);
 
+
 	std::vector<VkDescriptorPoolSize> sizes = { 
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 }, 
-		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10 } 
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 }, 
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 }
 	};
 
 	VkDescriptorPoolCreateInfo pool_info = {};
@@ -85,7 +88,7 @@ void ForwardRenderer::initDescriptorSets()
 	pool_info.poolSizeCount = (uint32_t)sizes.size();
 	pool_info.pPoolSizes = sizes.data();
 
-	vkCreateDescriptorPool(device, &pool_info, nullptr, &descriptorPool);
+	vkCreateDescriptorPool(device, &pool_info, nullptr, &EC::get()->vulkanContext->descriptorPool);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 
@@ -104,12 +107,8 @@ void ForwardRenderer::initDescriptorSets()
 			&frames[i].objectBuffer.allocation, nullptr);
 
 		// Allocate frame uniform descriptor set
-		VkDescriptorSetAllocateInfo allocInfo = vkInit::getDescriptorAllocInfo(descriptorPool, &frameSetLayout, 1);
+		VkDescriptorSetAllocateInfo allocInfo = vkInit::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &frameSetLayout, 1);
 		vkAllocateDescriptorSets(device, &allocInfo, &frames[i].frameDescriptor);
-
-		// Allocate Object data descriptor Set
-		allocInfo = vkInit::getDescriptorAllocInfo(descriptorPool, &objectUniformLayout, 1);
-		vkAllocateDescriptorSets(device, &allocInfo, &frames[i].objectDescriptor);
 
 		VkDescriptorBufferInfo frameBUfferInfo{};
 		frameBUfferInfo.buffer = frames[i].frameUniforms.buffer;
@@ -125,11 +124,11 @@ void ForwardRenderer::initDescriptorSets()
 			&frameBUfferInfo, 0);
 
 		VkWriteDescriptorSet objectDescriptorWrite = vkInit::writeDescriptorSet(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
-			frames[i].objectDescriptor, &ObjectBufferInfo, 0);
+			frames[i].frameDescriptor, &ObjectBufferInfo, 1);
 
 		VkWriteDescriptorSet setWrites[] = { setWrite, objectDescriptorWrite };
-
 		vkUpdateDescriptorSets(device, 2, setWrites, 0, nullptr);
+		std::cout << "x";
 	}
 }
 
