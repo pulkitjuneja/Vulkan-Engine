@@ -5,7 +5,7 @@
 #include "Renderer/VulkanContext.h"
 #include "Renderer/Uniforms.h"
 
-GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
+vk::GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

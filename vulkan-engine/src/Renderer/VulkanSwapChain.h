@@ -19,9 +19,9 @@ struct VulkanSwapChain {
 	VkRenderPass screenRenderPass;
 
 	std::vector<VkImage> swapChainImages;
-	AllocatedImage screenDepthBuffer;
+	vk::Texture screenDepthBuffer;
 	std::vector<VkImageView> swapChainImageViews; 
-	VkImageView depthBufferImageView;
+	//VkImageView depthBufferImageView;
 	std::vector<VkFramebuffer> frameBuffers;
 
 	void initialize(const VulkanDevice& device, const VkSurfaceKHR surface);

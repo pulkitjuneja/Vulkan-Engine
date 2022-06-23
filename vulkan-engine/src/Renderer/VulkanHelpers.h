@@ -8,40 +8,101 @@
 #include "vk_mem_alloc.h"
 #include <vector>
 
-struct GraphicsPipeline {
-    VkPipeline pipeline;
-    VkPipelineLayout pipelineLayout;
+#define VK_CHECK(x)                                                 \
+	do                                                              \
+	{                                                               \
+		VkResult err = x;                                           \
+		if (err)                                                    \
+		{                                                           \
+			std::cout <<"Detected Vulkan error: " << err << std::endl; \
+			abort();                                                \
+		}                                                           \
+	} while (0)                 
 
-    VkDescriptorSetLayout GlobalUniformLayout;
-    VkDescriptorSetLayout PerObjectLayout;
-};
+class VulkanDevice;
 
-struct AllocatedBuffer {
-    VkBuffer buffer;
-    VmaAllocation allocation;
-};
+namespace vk {
 
-struct AllocatedImage {
-    VkImage image;
-    VmaAllocation allocation;
-};
+    enum class ResourceState {
+        UNINITIALIZED = 0,
+        READY,
+        DESTROYED
+    };
 
-struct Texture {
-    AllocatedImage image;
-    VkSampler sampler;
-    VkImageView view;
-};
+    struct GraphicsPipeline {
+        VkPipeline pipeline;
+        VkPipelineLayout pipelineLayout;
 
-namespace vkInit {
+        VkDescriptorSetLayout GlobalUniformLayout;
+        VkDescriptorSetLayout PerObjectLayout;
+    };
 
-    VkBufferCreateInfo getBufferCreateinfo(VkDeviceSize bufferSize,
-        VkBufferUsageFlags usageFlags);
+    struct Buffer {
+        VkBuffer handle;
+        VmaAllocation allocation;
+        VmaAllocator* allocatorRef;
+        VmaMemoryUsage memoryUsage;
+        VkBufferUsageFlags usageFlags;
+        ResourceState state;
 
-    VkImageCreateInfo getImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent,
-        uint32_t mipLevels = 1, uint32_t arrayLayers = 1);
+        void create(uint64_t bufferSize,
+            VkBufferUsageFlags usageFlags,
+            VmaMemoryUsage usage);
+        void destroy();
+        void copyData(void* data, size_t size);
+        void copyToBuffer(Buffer& dest, 
+            uint64_t srcOffset,
+            uint64_t destOffset,
+            uint64_t size);
+    };
 
-    VkImageViewCreateInfo getImageViewCreateInfo(VkFormat format, VkImage image,
-        VkImageAspectFlags aspectFlags);
+    struct Image {
+        VkImage handle;
+        VmaAllocation allocation;
+        VmaAllocator* allocatorRef;
+        //ResourceState state;
+        VkExtent3D extent;
+        VkFormat format;
+        uint32_t mipLevels;
+        uint32_t layers;
+    };
+
+    struct Texture {
+        Image image;
+        VkSampler sampler;
+        VkImageView view;
+        VkImageViewType viewType;
+        VulkanDevice* deviceRef;
+
+        bool hasSampler;
+
+        void create(VkFormat format,
+            VkImageUsageFlags usageFlags,
+            VkExtent3D extent,
+            uint32_t mipLevels,
+            uint32_t arrayLayers);
+        void createView(VkImageAspectFlags aspectFlags, 
+            VkImageViewType viewType);
+        void createSampler(VkFilter minFilter,
+            VkFilter magFilter,
+            VkSamplerAddressMode samplerAddressMode);
+        void destroy();
+        //void transitionLayout(VkCommandBuffer cmd,
+        //    VkImageSubresourceRange range,
+        //    VkImageLayout oldLayout,
+        //    VkImageLayout newLayout,
+        //    )
+        void copyFromBuffer(Buffer& srcbuffer);
+    };
+
+    //VkBufferCreateInfo getBufferCreateinfo(VkDeviceSize bufferSize,
+    //    VkBufferUsageFlags usageFlags);
+
+    //VkImageCreateInfo getImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent,
+    //    uint32_t mipLevels = 1, uint32_t arrayLayers = 1);
+
+    //VkImageViewCreateInfo getImageViewCreateInfo(VkFormat format, VkImage image,
+    //    VkImageAspectFlags aspectFlags);
 
     VkFramebufferCreateInfo getFrameBufferCreateInfo(VkRenderPass renderPass, VkExtent2D extent, 
         uint32_t attachmentCount, VkImageView* attachments);
@@ -64,11 +125,11 @@ namespace vkInit {
     //VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range,
     //    VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask = 0);
 
-    VkImageMemoryBarrier getImageTransitionInfo(VkImage dstImage, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageSubresourceRange range, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask);
+    //VkImageMemoryBarrier getImageTransitionInfo(VkImage dstImage, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageSubresourceRange range, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask);
 
-    VkSamplerCreateInfo getSamplerCreateInfo(VkFilter filters, VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
+    //VkSamplerCreateInfo getSamplerCreateInfo(VkFilter filters, VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
-    VkBufferImageCopy getBufferImageCopyInfo(VkImageAspectFlags aspectmask, VkExtent3D extents);
+    //VkBufferImageCopy getBufferImageCopyInfo(VkImageAspectFlags aspectmask, VkExtent3D extents);
 }
 
 

@@ -28,7 +28,7 @@ public:
 	VkVertexInputBindingDescription bindingDescription {};
 	std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions {};
 
-	GraphicsPipeline Cache;
+	vk::GraphicsPipeline Cache;
 
 	PipelineBuilder& setVertexInputStateInfo();
 	PipelineBuilder& setPipelineInputAssemblyStateInfo(VkPrimitiveTopology topology);
@@ -40,7 +40,7 @@ public:
 	PipelineBuilder& setMultiSamplingInfo();
 	PipelineBuilder& setPipelineLayout(VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout PerObjectLayout);
 	PipelineBuilder& DepthStencilCreateInfo(bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp);
-	GraphicsPipeline build_pipeline(VkRenderPass pass);
+	vk::GraphicsPipeline build_pipeline(VkRenderPass pass);
 
 	std::vector<char> readFile(std::string filePath);
 };

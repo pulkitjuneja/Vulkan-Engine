@@ -53,14 +53,14 @@ void SceneRenderer::renderScene(size_t currentFrame, bool passBaseMaterialProper
 	std::vector<VkSemaphore> signalSemaphores = { frames[currentFrame].renderFinishedSemaphore };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	std::vector<VkCommandBuffer> commandBuffers = { frames[currentFrame].FrameCommandBuffer.commandBuffer };
-	VkSubmitInfo submitInfo = vkInit::getSubmitInfo(waitSemaphores, signalSemaphores, waitStages, commandBuffers);
+	VkSubmitInfo submitInfo = vk::getSubmitInfo(waitSemaphores, signalSemaphores, waitStages, commandBuffers);
 
 	if (vkQueueSubmit(device.queues.graphicsQueue, 1, &submitInfo, frames[currentFrame].inFlightFence) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
 	std::vector<VkSwapchainKHR> swapChains = { swapChain.vkSwapChain };
-	VkPresentInfoKHR presentInfo = vkInit::getPresentInfo(signalSemaphores, swapChains, &nextImageIndex);
+	VkPresentInfoKHR presentInfo = vk::getPresentInfo(signalSemaphores, swapChains, &nextImageIndex);
 
 	vkQueuePresentKHR(device.queues.presentQueue, &presentInfo);
 }

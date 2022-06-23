@@ -12,12 +12,12 @@ Material::Material() {
 	// TODO: this will be set by material loader
 	pipeline = &EC::get()->resourceManager->getPipeline("BasePipeine");
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkDescriptorSetAllocateInfo allocInfo = vkInit::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &pipeline->PerObjectLayout, 1);
+		VkDescriptorSetAllocateInfo allocInfo = vk::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &pipeline->PerObjectLayout, 1);
 		vkAllocateDescriptorSets(device, &allocInfo, &MaterialDescriptorSet[i]);
 	}
 
 	// Set defaul texture
-	Texture* default = EC::get()->resourceManager->getTexture("Assets/Textures/Default.jpg");
+	vk::Texture* default = EC::get()->resourceManager->getTexture("Assets/Textures/Default.jpg");
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		VkDescriptorImageInfo imageBufferInfo;
 		imageBufferInfo.sampler = default->sampler;
@@ -37,7 +37,7 @@ Material::Material() {
 	}
 }
 
-void Material::setDiffuseTexture(Texture* diffuseMap)
+void Material::setDiffuseTexture(vk::Texture* diffuseMap)
 {
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 	this->diffuseMap = diffuseMap;

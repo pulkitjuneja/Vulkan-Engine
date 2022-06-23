@@ -10,13 +10,13 @@
 struct Material {
 
 	std::string name;
-	GraphicsPipeline* pipeline;
-	Texture* diffuseMap;
+	vk::GraphicsPipeline* pipeline;
+	vk::Texture* diffuseMap;
 	bool needsUpdate;
 	VkDescriptorSet MaterialDescriptorSet[MAX_FRAMES_IN_FLIGHT];
 
 	Material();
-	void setDiffuseTexture(Texture* diffuseMap);
+	void setDiffuseTexture(vk::Texture* diffuseMap);
 };
 
 

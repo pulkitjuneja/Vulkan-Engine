@@ -55,18 +55,8 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 		swapChainExtent.width, swapChainExtent.height, 1
 	};
 
+	screenDepthBuffer.create(VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, depthImageExtent, 1, 1);
 	// create depth buffer
-	VkImageCreateInfo depthBufferCreateInfo = vkInit::getImageCreateInfo(VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, depthImageExtent);
-
-	VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-	VmaAllocationCreateInfo vmaallocInfo = {};
-	vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-	vmaallocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	if (vmaCreateImage(alloc, &depthBufferCreateInfo, &vmaallocInfo, &screenDepthBuffer.image, &screenDepthBuffer.allocation, nullptr)) {
-        Logger::logError("Error creating image");
-    }
-
 	createImageViews(device);
 	createScreenRenderPass();
 	createFrameBuffers();
@@ -86,8 +76,7 @@ void VulkanSwapChain::release(const VulkanDevice& device)
 	}
 
 	VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-	vkDestroyImageView(device.getLogicalDevice(), depthBufferImageView, nullptr);
-	vmaDestroyImage(alloc, screenDepthBuffer.image, screenDepthBuffer.allocation);
+	screenDepthBuffer.destroy();
 
 	vkDestroySwapchainKHR(device.getLogicalDevice(), vkSwapChain, nullptr);
 }
@@ -221,10 +210,10 @@ void VulkanSwapChain::createFrameBuffers()
 	for (int i = 0; i < swapChainImageViews.size(); i++) {
 		VkImageView attachments[] = {
 			swapChainImageViews[i],
-			depthBufferImageView
+			screenDepthBuffer.view
 		};
 
-		VkFramebufferCreateInfo framebufferInfo = vkInit::getFrameBufferCreateInfo(screenRenderPass, swapChainExtent, 2, &attachments[0]);
+		VkFramebufferCreateInfo framebufferInfo = vk::getFrameBufferCreateInfo(screenRenderPass, swapChainExtent, 2, &attachments[0]);
 
 		VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
 		if (vkCreateFramebuffer(device.getLogicalDevice(), &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
@@ -238,20 +227,24 @@ void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 	swapChainImageViews.resize(swapChainImages.size());
 
 	for (int i = 0; i < swapChainImages.size(); i++) {
-		VkImageViewCreateInfo createInfo = vkInit::getImageViewCreateInfo(swapChainImageFormat, swapChainImages[i],
-			VK_IMAGE_ASPECT_COLOR_BIT);
+		VkImageViewCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.image = swapChainImages[i];
+		createInfo.format = swapChainImageFormat;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
 		if (vkCreateImageView(device.getLogicalDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image views!");
 		}
 	}
 
-	VkImageViewCreateInfo depthImageCreateInfo = vkInit::getImageViewCreateInfo(VK_FORMAT_D32_SFLOAT, screenDepthBuffer.image,
-		VK_IMAGE_ASPECT_DEPTH_BIT);
-
-	if (vkCreateImageView(device.getLogicalDevice(), &depthImageCreateInfo, nullptr, &depthBufferImageView)) {
-		throw std::runtime_error("failed to create depth buffer image view!");
-	}
+	screenDepthBuffer.createView(VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_VIEW_TYPE_2D);
 }
 
 uint32_t VulkanSwapChain::acquireNextImage(int currentFrameIndex)

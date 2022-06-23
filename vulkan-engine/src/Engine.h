@@ -22,7 +22,7 @@ protected:
 	bool isEngineRunning;
 	size_t currentFrame = 0;
 
-	GraphicsPipeline pipeline;
+	vk::GraphicsPipeline pipeline;
 
 	Scene scene;
 	ForwardRenderer renderer;

@@ -22,10 +22,10 @@ struct FrameData {
 	VulkanCommandBuffer FrameCommandBuffer;
 	VkFence inFlightFence;
 
-	AllocatedBuffer frameUniforms;
+	vk::Buffer frameUniforms;
 	VkDescriptorSet frameDescriptor;
 
-	AllocatedBuffer objectBuffer;
+	vk::Buffer objectBuffer;
 	VkDescriptorSet objectDescriptor;
 };
 
@@ -41,7 +41,6 @@ protected:
 	VkSurfaceKHR surface;
 	VulkanSwapChain swapChain;
 	VkCommandPool graphicsCommandPool;
-
 
 public:
 	VmaAllocator allocator;

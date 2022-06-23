@@ -107,7 +107,7 @@ void VulkanContext::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& f
 	std::vector<VkSemaphore> waitSemaphores = {};
 	std::vector<VkSemaphore> signalSemaphores = {};
 	std::vector<VkCommandBuffer> cmds = { cmd.commandBuffer };
-	VkSubmitInfo submitInfo = vkInit::getSubmitInfo(waitSemaphores, signalSemaphores, nullptr, cmds);
+	VkSubmitInfo submitInfo = vk::getSubmitInfo(waitSemaphores, signalSemaphores, nullptr, cmds);
 
 	vkQueueSubmit(device.queues.graphicsQueue, 1, &submitInfo, context.fence);
 
@@ -115,6 +115,7 @@ void VulkanContext::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& f
 	vkResetFences(device.getLogicalDevice(), 1, &context.fence);
 	
 	//clear the command pool. This will free the command buffer too
+	// TODO : Shoudl I do this, what happens if multiple copy commands are happenign simultaneously 
 	vkResetCommandPool(device.getLogicalDevice(), context.commandPool, 0);
 }
 

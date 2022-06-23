@@ -16,7 +16,7 @@ void ForwardRenderer::startup()
 	layouts.push_back(frameSetLayout);
 
 	PipelineBuilder builder;
-	GraphicsPipeline pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
+	vk::GraphicsPipeline pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
 		setShaderStagesInfo("Assets/shaders/triangleVert.spv", "Assets/shaders/triangleFrag.spv").
 		setViewPortInfo(EC::get()->vulkanContext->getSwapChain().swapChainExtent).
 		setScissor({ 0,0 }, EC::get()->vulkanContext->getSwapChain().swapChainExtent).
@@ -35,12 +35,13 @@ void ForwardRenderer::shutdown()
 	auto& frames = EC::get()->vulkanContext->frames;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		vmaDestroyBuffer(allocator, frames[i].objectBuffer.buffer, frames[i].objectBuffer.allocation);
-		vmaDestroyBuffer(allocator, frames[i].frameUniforms.buffer, frames[i].frameUniforms.allocation);
+		frames[i].frameUniforms.destroy();
+		frames[i].objectBuffer.destroy();
 	}
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 	vkDestroyDescriptorPool(device, EC::get()->vulkanContext->descriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(device, frameSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, objectUniformLayout, nullptr);
 }
 
 void ForwardRenderer::initDescriptorSets()
@@ -50,10 +51,10 @@ void ForwardRenderer::initDescriptorSets()
 
 	// Set layout for uniform buffer
 	VkDescriptorSetLayoutBinding layoutBindings[2];
-	layoutBindings[0] = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+	layoutBindings[0] = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0);
 
-	layoutBindings[1] = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+	layoutBindings[1] = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		VK_SHADER_STAGE_VERTEX_BIT, 1);
 
 	VkDescriptorSetLayoutCreateInfo setInfo = {};
@@ -64,7 +65,7 @@ void ForwardRenderer::initDescriptorSets()
 	setInfo.pBindings = layoutBindings;
 	vkCreateDescriptorSetLayout(device, &setInfo, nullptr, &frameSetLayout);
 
-	VkDescriptorSetLayoutBinding textureBinding = vkInit::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
+	VkDescriptorSetLayoutBinding textureBinding = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
 
 	setInfo = {};
 	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -93,37 +94,27 @@ void ForwardRenderer::initDescriptorSets()
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 
 
-		VkBufferCreateInfo frameUniformsBufferInfo = vkInit::getBufferCreateinfo(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-		VkBufferCreateInfo objectUniformsBufferInfo = vkInit::getBufferCreateinfo(sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-
-		VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-		VmaAllocationCreateInfo vmaallocInfo = {};
-		vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-		vmaCreateBuffer(alloc, &frameUniformsBufferInfo, &vmaallocInfo, &frames[i].frameUniforms.buffer,
-			&frames[i].frameUniforms.allocation, nullptr);
-
-		vmaCreateBuffer(alloc, &objectUniformsBufferInfo, &vmaallocInfo, &frames[i].objectBuffer.buffer,
-			&frames[i].objectBuffer.allocation, nullptr);
+		frames[i].frameUniforms.create(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		frames[i].objectBuffer.create(sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
 		// Allocate frame uniform descriptor set
-		VkDescriptorSetAllocateInfo allocInfo = vkInit::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &frameSetLayout, 1);
+		VkDescriptorSetAllocateInfo allocInfo = vk::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &frameSetLayout, 1);
 		vkAllocateDescriptorSets(device, &allocInfo, &frames[i].frameDescriptor);
 
 		VkDescriptorBufferInfo frameBUfferInfo{};
-		frameBUfferInfo.buffer = frames[i].frameUniforms.buffer;
+		frameBUfferInfo.buffer = frames[i].frameUniforms.handle;
 		frameBUfferInfo.offset = 0;
 		frameBUfferInfo.range = sizeof(PerFrameUniforms);
 
 		VkDescriptorBufferInfo ObjectBufferInfo{};
-		ObjectBufferInfo.buffer = frames[i].objectBuffer.buffer;
+		ObjectBufferInfo.buffer = frames[i].objectBuffer.handle;
 		ObjectBufferInfo.offset = 0;
 		ObjectBufferInfo.range = sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT;
 
-		VkWriteDescriptorSet setWrite = vkInit::writeDescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, frames[i].frameDescriptor,
+		VkWriteDescriptorSet setWrite = vk::writeDescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, frames[i].frameDescriptor,
 			&frameBUfferInfo, 0);
 
-		VkWriteDescriptorSet objectDescriptorWrite = vkInit::writeDescriptorSet(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+		VkWriteDescriptorSet objectDescriptorWrite = vk::writeDescriptorSet(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
 			frames[i].frameDescriptor, &ObjectBufferInfo, 1);
 
 		VkWriteDescriptorSet setWrites[] = { setWrite, objectDescriptorWrite };

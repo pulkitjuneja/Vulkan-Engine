@@ -37,76 +37,99 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
         return attributeDescriptions;
 }
 
+//Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<SubMesh> subMeshes)
+//{
+//    this->vertices = vertices;
+//    this->indices = indices;
+//    this->subMeshes = subMeshes;
+//
+//    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
+//    auto& gc = EC::get()->vulkanContext;
+//
+//    vk::Buffer stagingBuffer;
+//
+//    // create staging buffer for vertexBuffer
+//    VkBufferCreateInfo stagingBuferInfo = vk::getBufferCreateinfo(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+//    VmaAllocationCreateInfo vmaallocInfo = {};
+//    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+//    if (vmaCreateBuffer(alloc, &stagingBuferInfo, &vmaallocInfo, &stagingBuffer.handle, &stagingBuffer.allocation, nullptr) != VK_SUCCESS) {
+//        Logger::logError("failed to create staging buffer");
+//    }
+//    void* data;
+//    vmaMapMemory(alloc, stagingBuffer.allocation, &data);
+//    memcpy(data, vertices.data(), vertices.size() * sizeof(Vertex));
+//    vmaUnmapMemory(alloc, stagingBuffer.allocation);
+//
+//    // copy vertex buffer data to GPU only buffer
+//    VkBufferCreateInfo vertexBufferInfo = vk::getBufferCreateinfo(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+//    vmaallocInfo = {};
+//    vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+//    if (vmaCreateBuffer(alloc, &vertexBufferInfo, &vmaallocInfo, &this->vertexBuffer.handle, &this->vertexBuffer.allocation, nullptr) != VK_SUCCESS) {
+//        Logger::logError("failed to create vertex buffer for mesh");
+//    }
+//    gc->immediateSubmit([=](VkCommandBuffer cmd) {
+//        VkBufferCopy copy;
+//        copy.dstOffset = 0;
+//        copy.srcOffset = 0;
+//        copy.size = vertices.size() * sizeof(Vertex);
+//        vkCmdCopyBuffer(cmd, stagingBuffer.handle, vertexBuffer.handle, 1, &copy);
+//        });
+//    vmaDestroyBuffer(alloc, stagingBuffer.handle, stagingBuffer.allocation);
+//
+//    //create staging buffer for indices
+//    stagingBuferInfo = vk::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+//    vmaallocInfo = {};
+//    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+//    if (vmaCreateBuffer(alloc, &stagingBuferInfo, &vmaallocInfo, &stagingBuffer.handle, &stagingBuffer.allocation, nullptr) != VK_SUCCESS) {
+//        Logger::logError("failed to create staging buffer");
+//    }
+//
+//    vmaMapMemory(alloc, stagingBuffer.allocation, &data);
+//    memcpy(data, indices.data(), indices.size() * sizeof(uint16_t));
+//    vmaUnmapMemory(alloc, stagingBuffer.allocation);
+//
+//    //copy index data to gpu only buffer
+//    VkBufferCreateInfo indexBufferInfo = vk::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+//    vmaallocInfo = {};
+//    vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+//    if (vmaCreateBuffer(alloc, &indexBufferInfo, &vmaallocInfo, &indexBuffer.handle, &indexBuffer.allocation, nullptr) != VK_SUCCESS) {
+//        Logger::logError("failed to create index buffer");
+//    }
+//    gc->immediateSubmit([=](VkCommandBuffer cmd) {
+//        VkBufferCopy copy;
+//        copy.dstOffset = 0;
+//        copy.srcOffset = 0;
+//        copy.size = indices.size() * sizeof(uint16_t);
+//        vkCmdCopyBuffer(cmd, stagingBuffer.handle, indexBuffer.handle, 1, &copy);
+//        });
+//    vmaDestroyBuffer(alloc, stagingBuffer.handle, stagingBuffer.allocation);
+//}
+
 Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<SubMesh> subMeshes)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->subMeshes = subMeshes;
 
-    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-    auto& gc = EC::get()->vulkanContext;
+    this->vertexBuffer.create(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 
-    AllocatedBuffer stagingBuffer;
+    this->indexBuffer.create(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 
-    // create staging buffer for vertexBuffer
-    VkBufferCreateInfo stagingBuferInfo = vkInit::getBufferCreateinfo(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-    VmaAllocationCreateInfo vmaallocInfo = {};
-    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-    if (vmaCreateBuffer(alloc, &stagingBuferInfo, &vmaallocInfo, &stagingBuffer.buffer, &stagingBuffer.allocation, nullptr) != VK_SUCCESS) {
-        Logger::logError("failed to create staging buffer");
-    }
-    void* data;
-    vmaMapMemory(alloc, stagingBuffer.allocation, &data);
-    memcpy(data, vertices.data(), vertices.size() * sizeof(Vertex));
-    vmaUnmapMemory(alloc, stagingBuffer.allocation);
+    // Create staging buffer for vertices
+    vk::Buffer stagingBuffer;
+    stagingBuffer.create(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+    stagingBuffer.copyData(vertices.data(), vertices.size() * sizeof(Vertex));
+    stagingBuffer.copyToBuffer(this->vertexBuffer, 0, 0, vertices.size() * sizeof(Vertex));
+    stagingBuffer.destroy();
 
-    // copy vertex buffer data to GPU only buffer
-    VkBufferCreateInfo vertexBufferInfo = vkInit::getBufferCreateinfo(vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-    vmaallocInfo = {};
-    vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-    if (vmaCreateBuffer(alloc, &vertexBufferInfo, &vmaallocInfo, &this->vertexBuffer.buffer, &this->vertexBuffer.allocation, nullptr) != VK_SUCCESS) {
-        Logger::logError("failed to create vertex buffer for mesh");
-    }
-    gc->immediateSubmit([=](VkCommandBuffer cmd) {
-        VkBufferCopy copy;
-        copy.dstOffset = 0;
-        copy.srcOffset = 0;
-        copy.size = vertices.size() * sizeof(Vertex);
-        vkCmdCopyBuffer(cmd, stagingBuffer.buffer, vertexBuffer.buffer, 1, &copy);
-        });
-    vmaDestroyBuffer(alloc, stagingBuffer.buffer, stagingBuffer.allocation);
-
-    //create staging buffer for indices
-    stagingBuferInfo = vkInit::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-    vmaallocInfo = {};
-    vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-    if (vmaCreateBuffer(alloc, &stagingBuferInfo, &vmaallocInfo, &stagingBuffer.buffer, &stagingBuffer.allocation, nullptr) != VK_SUCCESS) {
-        Logger::logError("failed to create staging buffer");
-    }
-
-    vmaMapMemory(alloc, stagingBuffer.allocation, &data);
-    memcpy(data, indices.data(), indices.size() * sizeof(uint16_t));
-    vmaUnmapMemory(alloc, stagingBuffer.allocation);
-
-    //copy index data to gpu only buffer
-    VkBufferCreateInfo indexBufferInfo = vkInit::getBufferCreateinfo(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-    vmaallocInfo = {};
-    vmaallocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-    if (vmaCreateBuffer(alloc, &indexBufferInfo, &vmaallocInfo, &indexBuffer.buffer, &indexBuffer.allocation, nullptr) != VK_SUCCESS) {
-        Logger::logError("failed to create index buffer");
-    }
-    gc->immediateSubmit([=](VkCommandBuffer cmd) {
-        VkBufferCopy copy;
-        copy.dstOffset = 0;
-        copy.srcOffset = 0;
-        copy.size = indices.size() * sizeof(uint16_t);
-        vkCmdCopyBuffer(cmd, stagingBuffer.buffer, indexBuffer.buffer, 1, &copy);
-        });
-    vmaDestroyBuffer(alloc, stagingBuffer.buffer, stagingBuffer.allocation);
+    // create staging buffer for indices
+    stagingBuffer.create(indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+    stagingBuffer.copyData(indices.data(), indices.size() * sizeof(uint16_t));
+    stagingBuffer.copyToBuffer(this->indexBuffer, 0, 0, indices.size() * sizeof(uint16_t));
+    stagingBuffer.destroy();
 }
 
 void Mesh::release() {
-    VmaAllocator alloc = EngineContext::get()->vulkanContext->allocator;
-    vmaDestroyBuffer(alloc, indexBuffer.buffer, indexBuffer.allocation);
-    vmaDestroyBuffer(alloc, vertexBuffer.buffer, vertexBuffer.allocation);
+    vertexBuffer.destroy();
+    indexBuffer.destroy();
 }
