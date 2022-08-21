@@ -8,13 +8,23 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "SceneRenderer.h"
+#include "VulkanHelpers.h"
 
 #define MAX_OBJECT_COUNT 1024
 
 class ForwardRenderer : public ISystem {
 protected:
-	VkDescriptorSetLayout frameSetLayout;
-	VkDescriptorSetLayout objectUniformLayout;
+	vk::DescriptorSetLayout frameSetLayout;
+	vk::DescriptorSetLayout objectUniformLayout;
+	PerFrameData<vk::CommandBuffer> frameCommandBuffers;
+
+	// Global Uniform buffer and descriptorset
+	PerFrameData<vk::Buffer> frameUniforms;
+	PerFrameData<vk::DescriptorSet> frameDescriptors;
+
+	// Per entity data buffer and descriptor set
+	PerFrameData<vk::Buffer> objectBuffers;
+	PerFrameData<vk::DescriptorSet> objectDescriptorSet;
 
 	SceneRenderer sceneRenderer;
 

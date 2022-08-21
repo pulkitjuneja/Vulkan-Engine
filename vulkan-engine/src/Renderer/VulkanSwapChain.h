@@ -6,7 +6,6 @@
 #include "Window.h"
 #include <vector>
 #include "VulkanDevice.h"
-#include "VulkanCommandBuffer.h"
 #include "EngineContext.h"
 #include "VulkanHelpers.h"
 
@@ -17,6 +16,7 @@ struct VulkanSwapChain {
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
 	VkRenderPass screenRenderPass;
+	VulkanDevice* deviceRef;
 
 	std::vector<VkImage> swapChainImages;
 	vk::Texture screenDepthBuffer;
@@ -34,8 +34,9 @@ struct VulkanSwapChain {
 	void createScreenRenderPass();
 	void createFrameBuffers();
 	void createImageViews(const VulkanDevice& device);
+	void presentImage(std::vector<VkSemaphore> signalSemaphores, uint32_t imageIndex);
 
-	uint32_t acquireNextImage(int currentFrameIndex);
+	uint32_t acquireNextImage(VkSemaphore imageAvailableSemaphore);
 
 };
 

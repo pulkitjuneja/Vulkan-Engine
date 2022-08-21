@@ -8,8 +8,6 @@
 #include "Logger.h"
 #include "EngineContext.h"
 #include "Renderer/VulkanContext.h"
-#include "Renderer/Pipelines/BasicPipeline.h"
-#include "Renderer/VulkanCommandBuffer.h"
 #include "Renderer/Vertex.h"
 #include "Scene/Scene.h"
 #include "Renderer/ForwardRenderer.h"
@@ -18,7 +16,7 @@
 class Engine {
 protected:
 	std::unique_ptr<Window> window;
-	std::unique_ptr<VulkanContext> graphicsContext;
+	std::unique_ptr<vk::Context> graphicsContext;
 	bool isEngineRunning;
 	size_t currentFrame = 0;
 

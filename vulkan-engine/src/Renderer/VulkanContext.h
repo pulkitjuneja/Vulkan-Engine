@@ -14,59 +14,58 @@
 #include "VulkanSwapChain.h"
 #include "VulkanInstance.h"
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
-
-struct FrameData {
-	VkSemaphore imageAvailableSemaphore;
-	VkSemaphore renderFinishedSemaphore;
-	VulkanCommandBuffer FrameCommandBuffer;
-	VkFence inFlightFence;
-
-	vk::Buffer frameUniforms;
-	VkDescriptorSet frameDescriptor;
-
-	vk::Buffer objectBuffer;
-	VkDescriptorSet objectDescriptor;
-};
+//struct FrameData {
+//	vk::Buffer frameUniforms;
+//	vk::DescriptorSet frameDescriptor;
+//
+//	vk::Buffer objectBuffer;
+//	vk::DescriptorSet objectDescriptor;
+//};
 
 struct immediateSubmitContext {
 	VkFence fence;
 	VkCommandPool commandPool;
 };
 
-class VulkanContext {
-protected:
-	VulkanInstance instance;
-	VulkanDevice device;
-	VkSurfaceKHR surface;
-	VulkanSwapChain swapChain;
-	VkCommandPool graphicsCommandPool;
+namespace vk {
+	class Context {
+	protected:
+		VulkanInstance instance;
+		VulkanDevice device;
+		VkSurfaceKHR surface;
+		VulkanSwapChain swapChain;
+		VkCommandPool graphicsCommandPool;
 
-public:
-	VmaAllocator allocator;
-	std::vector<FrameData> frames;
-	immediateSubmitContext context;
+	public:
+		VmaAllocator allocator;
+		//std::vector<FrameData> frames;
+		immediateSubmitContext context;
+		VkDescriptorPool descriptorPool;
+		PerFrameData<VkSemaphore> imageAvailableSemaphores;
+		PerFrameData<VkSemaphore> renderFinishSemaphores;
+		PerFrameData<VkFence> inFlightFences;
 
-	VulkanContext() = default;
-	void initialize();
-	void release();
+		Context() = default;
+		void initialize();
+		void release();
 
-	VulkanInstance& getInstance() { return instance; }
-	VulkanDevice& getDevice() { return device; }
-	VkSurfaceKHR& getSurface() { return surface; }
-	VulkanSwapChain& getSwapChain() { return swapChain; }
-	VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
+		VulkanInstance& getInstance() { return instance; }
+		VulkanDevice& getDevice() { return device; }
+		VkSurfaceKHR& getSurface() { return surface; }
+		VulkanSwapChain& getSwapChain() { return swapChain; }
+		VkCommandPool& getGraphicsCommandPool() { return graphicsCommandPool; }
 
-	// main descriptor pool
-	VkDescriptorPool descriptorPool;
+		// main descriptor pool
+		std::unordered_map<int, DescriptorSet> DescriptorSets;
 
-	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
+		void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
-	void initializeFrameData();
-	void releaseFrameData();
-	void createSurface();
-	void createVMAllocator();
-	void creategraphicsPool();
-};
+		void initializeFrameData();
+		void releaseFrameData();
+		void createSurface();
+		void createVMAllocator();
+		void creategraphicsPool();
+	};
+}
 
 #endif // !VULKAN_CONTEXT_H

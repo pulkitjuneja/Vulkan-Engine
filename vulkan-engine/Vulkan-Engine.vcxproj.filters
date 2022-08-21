@@ -49,9 +49,6 @@
     <ClInclude Include="src\Renderer\Uniforms.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Renderer\VulkanCommandBuffer.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Renderer\VulkanHelpers.h">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -90,9 +87,6 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\Vertex.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\VulkanHelpers.cpp">

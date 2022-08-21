@@ -49,6 +49,44 @@ namespace vk {
 
     //    return info;
     //}
+
+    //VkDescriptorSetLayoutBinding getDescripterLayoutBindingInfo(VkDescriptorType type, VkShaderStageFlags stageFlags, uint32_t binding)
+    //{
+    //    VkDescriptorSetLayoutBinding setbind = {};
+    //    setbind.binding = binding;
+    //    setbind.descriptorCount = 1;
+    //    setbind.descriptorType = type;
+    //    setbind.pImmutableSamplers = nullptr;
+    //    setbind.stageFlags = stageFlags;
+
+    //    return setbind;
+    //}
+    //VkWriteDescriptorSet writeDescriptorSet(VkDescriptorType type, VkDescriptorSet dstSet, VkDescriptorBufferInfo* bufferInfo, uint32_t binding)
+    //{
+    //    VkWriteDescriptorSet write = {};
+    //    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    //    write.pNext = nullptr;
+    //    write.dstBinding = binding;
+    //    write.dstSet = dstSet;
+    //    write.descriptorCount = 1;
+    //    write.descriptorType = type;
+    //    write.pBufferInfo = bufferInfo;
+
+    //    return write;
+    //}
+    //VkDescriptorSetAllocateInfo getDescriptorAllocInfo(VkDescriptorPool pool, VkDescriptorSetLayout* setLayouts,
+    //    uint32_t setCount)
+    //{
+    //    VkDescriptorSetAllocateInfo info = {};
+    //    info.pNext = nullptr;
+    //    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    //    info.descriptorPool = pool;
+    //    info.descriptorSetCount = setCount;
+    //    info.pSetLayouts = setLayouts;
+
+    //    return info;
+    //}
+
     VkFramebufferCreateInfo getFrameBufferCreateInfo(VkRenderPass renderPass, VkExtent2D extent, uint32_t attachmentCount,
         VkImageView* attachments)
     {
@@ -63,71 +101,36 @@ namespace vk {
 
         return info;
     }
-    VkDescriptorSetLayoutBinding getDescripterLayoutBindingInfo(VkDescriptorType type, VkShaderStageFlags stageFlags, uint32_t binding)
-    {
-        VkDescriptorSetLayoutBinding setbind = {};
-        setbind.binding = binding;
-        setbind.descriptorCount = 1;
-        setbind.descriptorType = type;
-        setbind.pImmutableSamplers = nullptr;
-        setbind.stageFlags = stageFlags;
 
-        return setbind;
-    }
-    VkWriteDescriptorSet writeDescriptorSet(VkDescriptorType type, VkDescriptorSet dstSet, VkDescriptorBufferInfo* bufferInfo, uint32_t binding)
-    {
-        VkWriteDescriptorSet write = {};
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.pNext = nullptr;
-        write.dstBinding = binding;
-        write.dstSet = dstSet;
-        write.descriptorCount = 1;
-        write.descriptorType = type;
-        write.pBufferInfo = bufferInfo;
+    //VkSubmitInfo getSubmitInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSemaphore>& signalSemaphores, 
+    //    VkPipelineStageFlags* waitStages, ::std::vector<VkCommandBuffer>& commandBuffers)
+    //{
+    //    VkSubmitInfo info{};
+    //    info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    //    info.pNext = nullptr;
+    //    info.waitSemaphoreCount = waitSemaphores.size();
+    //    info.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr;
+    //    info.pWaitDstStageMask = waitStages;
+    //    info.commandBufferCount = commandBuffers.size();
+    //    info.pCommandBuffers = commandBuffers.data();
+    //    info.signalSemaphoreCount = signalSemaphores.size();
+    //    info.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr;
 
-        return write;
-    }
-    VkDescriptorSetAllocateInfo getDescriptorAllocInfo(VkDescriptorPool pool, VkDescriptorSetLayout* setLayouts,
-        uint32_t setCount)
-    {
-        VkDescriptorSetAllocateInfo info = {};
-        info.pNext = nullptr;
-        info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        info.descriptorPool = pool;
-        info.descriptorSetCount = setCount;
-        info.pSetLayouts = setLayouts;
+    //    return info;
+    //}
+    //VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
+    //    uint32_t* nextImageIndices)
+    //{
+    //    VkPresentInfoKHR info{};
+    //    info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    //    info.waitSemaphoreCount = waitSemaphores.size();
+    //    info.pWaitSemaphores = waitSemaphores.data();
+    //    info.swapchainCount = swapChains.size();
+    //    info.pSwapchains = swapChains.data();
+    //    info.pImageIndices = nextImageIndices;
 
-        return info;
-    }
-    VkSubmitInfo getSubmitInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSemaphore>& signalSemaphores, 
-        VkPipelineStageFlags* waitStages, ::std::vector<VkCommandBuffer>& commandBuffers)
-    {
-        VkSubmitInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        info.pNext = nullptr;
-        info.waitSemaphoreCount = waitSemaphores.size();
-        info.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr;
-        info.pWaitDstStageMask = waitStages;
-        info.commandBufferCount = commandBuffers.size();
-        info.pCommandBuffers = commandBuffers.data();
-        info.signalSemaphoreCount = signalSemaphores.size();
-        info.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr;
-
-        return info;
-    }
-    VkPresentInfoKHR getPresentInfo(::std::vector<VkSemaphore>& waitSemaphores, ::std::vector<VkSwapchainKHR>& swapChains,
-        uint32_t* nextImageIndices)
-    {
-        VkPresentInfoKHR info{};
-        info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        info.waitSemaphoreCount = waitSemaphores.size();
-        info.pWaitSemaphores = waitSemaphores.data();
-        info.swapchainCount = swapChains.size();
-        info.pSwapchains = swapChains.data();
-        info.pImageIndices = nextImageIndices;
-
-        return info;
-    }
+    //    return info;
+    //}
     //VkImageMemoryBarrier getIMageMemoryBarrierInfo(VkImageLayout newLayout, VkImage dstImage, VkImageSubresourceRange range, 
     //    VkAccessFlags dstAccessMask, VkAccessFlags srcAccessMask)
     //{
@@ -195,6 +198,7 @@ namespace vk {
         allocatorRef = &EngineContext::get()->vulkanContext->allocator;
         memoryUsage = memUsage;
         this->usageFlags = usageFlags;
+        this->bufferSize = bufferSize;
 
         VkBufferCreateInfo bufferInfo = {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -267,6 +271,7 @@ namespace vk {
         this->image.extent = extent;
         this->image.mipLevels = mipLevels;
         this->image.layers = arrayLayers;
+        this->image.layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         VkImageCreateInfo info = { };
         info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -344,6 +349,8 @@ namespace vk {
 
             vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
                 nullptr, 1, &imageBarrier_toReadable);
+
+            this->image.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         });
     }
 
@@ -379,6 +386,260 @@ namespace vk {
         if (vkCreateImageView(deviceRef->logicalDevice, &viewInfo, nullptr, &view) != VK_SUCCESS) {
             Logger::logError("Error creating image view");
         }
+    }
+
+    // ---------------------------------- Descriptors ------------------------------------
+    int Descriptor::computeHash() {
+        int hash = 0;
+        utils::hashCombine(hash, binding);
+        utils::hashCombine(hash, static_cast<int>(type));
+        utils::hashCombine(hash, stageFlags);
+
+        return hash;
+    }
+
+    void DescriptorSetLayout::create(std::vector<Descriptor> descriptors) {
+        deviceRef = &EC::get()->vulkanContext->getDevice();
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+        for (auto& descriptor : descriptors) {
+            this->descriptors.emplace(std::make_pair(descriptor.binding, descriptor));
+            VkDescriptorSetLayoutBinding setbind = {};
+            setbind.binding = descriptor.binding;
+            setbind.descriptorCount = 1;
+            setbind.descriptorType = descriptor.type;
+            setbind.pImmutableSamplers = nullptr;
+            setbind.stageFlags = descriptor.stageFlags;
+            bindings.push_back(setbind);
+        }
+        VkDescriptorSetLayoutCreateInfo setInfo = {};
+        setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        setInfo.pNext = nullptr;
+        setInfo.bindingCount = bindings.size();
+        setInfo.flags = 0;
+        setInfo.pBindings = bindings.data();
+        vkCreateDescriptorSetLayout(deviceRef->logicalDevice, &setInfo, nullptr, &handle);
+    }
+
+    void DescriptorSetLayout::destroy() {
+        vkDestroyDescriptorSetLayout(deviceRef->logicalDevice, handle, nullptr);
+        this->descriptors.clear();
+    }
+
+    int DescriptorSetLayout::computeHash() {
+        int hash = 0;
+        for (auto& pair : descriptors) {
+            utils::hashCombine(hash, pair.second.computeHash());
+        }
+        return hash;
+    }
+
+    void DescriptorSetLayout::setBuffer(uint32_t binding, Buffer* buffer, uint64_t offset, uint64_t range) {
+        if (descriptors.find(binding) == descriptors.end()) {
+            Logger::logError("Invalid descriptor binding when setting buffer data");
+            return;
+        }
+        Descriptor& descriptor = descriptors[binding];
+        if (descriptor.type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER &&
+            descriptor.type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+            Logger::logError("Invalid descriptor type when setting buffer data");
+            return;
+        }
+        descriptor.buffer = buffer;
+        descriptor.offset = offset;
+        descriptor.range = range;
+    }
+
+    void DescriptorSetLayout::setTexture(uint32_t binding, Texture* texture) {
+        if (descriptors.find(binding) == descriptors.end()) {
+            Logger::logError("Invalid descriptor binding when setting texture data");
+            return;
+        }
+        Descriptor& descriptor = descriptors[binding];
+        if (descriptor.type != VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+            Logger::logError("Invalid descriptor type when setting texture data");
+            return;
+        }
+        descriptor.texture = texture;
+    }
+
+    DescriptorSet* DescriptorSetLayout::getDescriptorSet(DescriptorSet& outSet) {
+        
+        int hash = 0;
+        // calculate descriptors hash to see if the set is already in the 
+        for (auto& pair : descriptors) {
+            if (pair.second.buffer == nullptr && pair.second.texture == nullptr) {
+                Logger::logError("Error creating descriptor set Missing data in descriptors");
+                return nullptr;
+            }
+            //else if (pair.second.buffer != nullptr) {
+            //    utils::hashCombine(hash, pair.second.buffer);
+            //    utils::hashCombine(hash, pair.second.offset);
+            //    utils::hashCombine(hash, pair.second.range);
+            //}
+            //else {
+            //    utils::hashCombine(hash, pair.second.texture);
+            //}
+        }
+        outSet.create(*this);
+
+        // clear descriptor data in the layout
+        for (auto& pair : descriptors) {
+            pair.second.buffer = nullptr;
+            pair.second.texture = nullptr;
+            pair.second.range = 0;
+            pair.second.offset = 0;
+        }
+    }
+
+    void DescriptorSet::create(DescriptorSetLayout& layout) {
+
+        this->deviceRef = layout.deviceRef;
+        VkDescriptorPool pool = EC::get()->vulkanContext->descriptorPool;
+        VkDescriptorSetAllocateInfo info = {};
+        info.pNext = nullptr;
+        info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        info.descriptorPool = pool;
+        info.descriptorSetCount = 1;
+        info.pSetLayouts = &layout.handle;
+        if (vkAllocateDescriptorSets(layout.deviceRef->logicalDevice, &info, &handle) != VK_SUCCESS) {
+            Logger::logError("Error Allocating Descriptor Set");
+            return;
+        }
+
+        std::vector<Descriptor> descriptors;
+        for(auto & pair : layout.descriptors) {
+            descriptors.push_back(pair.second);
+        }
+        update(descriptors);
+    }
+
+    void DescriptorSet::update(std::vector<Descriptor>& descriptors) {
+        std::vector<VkWriteDescriptorSet> descriptorWrites(descriptors.size());
+        std::vector<VkDescriptorBufferInfo> bufferInfos(descriptors.size());
+        std::vector<VkDescriptorImageInfo> imageInfos(descriptors.size());
+        int index = 0;
+        for (auto& descriptor : descriptors) {
+            if (descriptor.type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
+                descriptor.type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+
+                VkDescriptorBufferInfo bufferInfo{};
+                bufferInfos[index].buffer = descriptor.buffer->handle;
+                bufferInfos[index].offset = descriptor.offset;
+                bufferInfos[index].range = descriptor.range;
+
+                descriptorWrites[index].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptorWrites[index].pNext = nullptr;
+                descriptorWrites[index].dstBinding = descriptor.binding;
+                descriptorWrites[index].dstSet = handle;
+                descriptorWrites[index].descriptorCount = 1;
+                descriptorWrites[index].descriptorType = descriptor.type;
+                descriptorWrites[index].pBufferInfo = &bufferInfos[index];
+                index++;
+            }
+            else if (descriptor.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+                VkDescriptorImageInfo imageInfo;
+                imageInfo.sampler = descriptor.texture->sampler;
+                imageInfo.imageView = descriptor.texture->view;
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                descriptorWrites[index].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptorWrites[index].pNext = nullptr;
+                descriptorWrites[index].dstBinding = descriptor.binding;
+                descriptorWrites[index].dstSet = handle;
+                descriptorWrites[index].descriptorCount = 1;
+                descriptorWrites[index].descriptorType = descriptor.type;
+                descriptorWrites[index].pImageInfo = &imageInfo;
+                index++;
+            }
+        }
+        vkUpdateDescriptorSets(deviceRef->logicalDevice, index, descriptorWrites.data(), 0, nullptr);
+    }
+
+    void GraphicsPipeline::bind(CommandBuffer cmd) {
+        vkCmdBindPipeline(cmd.handle, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+    }
+
+    void CommandBuffer::create(VkCommandPool& commandPool)
+    {
+        this->deviceRef = &EC::get()->vulkanContext->getDevice();
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = commandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(deviceRef->getLogicalDevice(), &allocInfo, &handle) != VK_SUCCESS) {
+            Logger::logError("failed to allocate command buffer!");
+        }
+    }
+
+    void CommandBuffer::beginRecording(VkCommandBufferUsageFlags flags)
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.pNext = nullptr;
+        beginInfo.pInheritanceInfo = nullptr;
+        beginInfo.flags = flags;
+
+        if (vkBeginCommandBuffer(handle, &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+    }
+
+    void CommandBuffer::endRecording()
+    {
+        if (vkEndCommandBuffer(handle) != VK_SUCCESS) {
+            Logger::logError("failed to record command buffer!");
+        }
+    }
+
+    void CommandBuffer::Draw(int vertexCount)
+    {
+        vkCmdDraw(handle, vertexCount, 1, 0, 0);
+    }
+
+    void CommandBuffer::submit(std::vector<VkSemaphore>& waitSemaphores, std::vector<VkSemaphore>& signalSemaphores, VkPipelineStageFlags* waitStages, std::vector<VkCommandBuffer>& commandBuffers,
+        VkFence frameFence)
+    {
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = nullptr;
+        submitInfo.waitSemaphoreCount = waitSemaphores.size();
+        submitInfo.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = commandBuffers.size();
+        submitInfo.pCommandBuffers = commandBuffers.data();
+        submitInfo.signalSemaphoreCount = signalSemaphores.size();
+        submitInfo.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr;
+
+        VulkanDevice& device = EC::get()->vulkanContext->getDevice();
+
+        if (vkQueueSubmit(device.queues.graphicsQueue, 1, &submitInfo, frameFence) != VK_SUCCESS) {
+            Logger::logError("failed to submit draw command buffer!");
+        }
+    }
+
+    void CommandBuffer::beginRenderPass(VkRenderPass& renderPass, VkFramebuffer& frameBuffer, VkExtent2D& extents) {
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderPass;
+        renderPassInfo.framebuffer = frameBuffer;
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = extents;
+
+        VkClearValue clearValues[2];
+
+        clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+        clearValues[1].depthStencil.depth = 1.0f;
+        renderPassInfo.clearValueCount = 2;
+        renderPassInfo.pClearValues = &clearValues[0];
+
+        vkCmdBeginRenderPass(handle, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
+    void CommandBuffer::endRenderPass() {
+        vkCmdEndRenderPass(handle);
     }
 }
 

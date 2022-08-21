@@ -38,7 +38,7 @@ public:
 	PipelineBuilder& setScissor(VkOffset2D offset, VkExtent2D& extents);
 	PipelineBuilder& setRasterizerInfo(VkPolygonMode polygonMode);
 	PipelineBuilder& setMultiSamplingInfo();
-	PipelineBuilder& setPipelineLayout(VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout PerObjectLayout);
+	PipelineBuilder& setPipelineLayout(vk::DescriptorSetLayout globalLayout, vk::DescriptorSetLayout PerObjectLayout);
 	PipelineBuilder& DepthStencilCreateInfo(bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp);
 	vk::GraphicsPipeline build_pipeline(VkRenderPass pass);
 

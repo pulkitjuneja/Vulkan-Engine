@@ -7,6 +7,7 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	swapChainImageFormat = surfaceFormat.format;
 	VkPresentModeKHR presentMode = chooseSwapPresentMode(device, surface);
 	swapChainExtent = chooseSwapExtent(device, surface);
+	deviceRef = &EC::get()->vulkanContext->getDevice();
 
 	uint32_t imageCount = capabilities.minImageCount + 1;
 	if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
@@ -24,7 +25,7 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	createInfo.presentMode = presentMode;
 	createInfo.imageUsage = 16;
 
-	QueueFamilyIndices indices = device.findQueueFamilies();
+	QueueFamilyIndices indices = deviceRef->findQueueFamilies();
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	// control sharing of swap chain across multiple queue families
@@ -42,14 +43,14 @@ void VulkanSwapChain::initialize(const VulkanDevice& device, const VkSurfaceKHR 
 	createInfo.preTransform = capabilities.currentTransform;
 	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-	VkResult res = vkCreateSwapchainKHR(device.getLogicalDevice(), &createInfo, nullptr, &vkSwapChain);
+	VkResult res = vkCreateSwapchainKHR(deviceRef->getLogicalDevice(), &createInfo, nullptr, &vkSwapChain);
 	if (res != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(device.getLogicalDevice(), vkSwapChain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(deviceRef->getLogicalDevice(), vkSwapChain, &imageCount, nullptr);
 	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(device.getLogicalDevice(), vkSwapChain, &imageCount, swapChainImages.data());
+	vkGetSwapchainImagesKHR(deviceRef->getLogicalDevice(), vkSwapChain, &imageCount, swapChainImages.data());
 
 	VkExtent3D depthImageExtent = {
 		swapChainExtent.width, swapChainExtent.height, 1
@@ -197,8 +198,7 @@ void VulkanSwapChain::createScreenRenderPass()
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 
-	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
-	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &screenRenderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(deviceRef->getLogicalDevice(), &renderPassInfo, nullptr, &screenRenderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
 
@@ -215,8 +215,7 @@ void VulkanSwapChain::createFrameBuffers()
 
 		VkFramebufferCreateInfo framebufferInfo = vk::getFrameBufferCreateInfo(screenRenderPass, swapChainExtent, 2, &attachments[0]);
 
-		VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
-		if (vkCreateFramebuffer(device.getLogicalDevice(), &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(deviceRef->getLogicalDevice(), &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
@@ -247,13 +246,25 @@ void VulkanSwapChain::createImageViews(const VulkanDevice& device)
 	screenDepthBuffer.createView(VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_VIEW_TYPE_2D);
 }
 
-uint32_t VulkanSwapChain::acquireNextImage(int currentFrameIndex)
+void VulkanSwapChain::presentImage(std::vector<VkSemaphore> waitSemaphores, uint32_t imageIndex)
 {
-	VulkanDevice& device = EngineContext::get()->vulkanContext->getDevice();
-	auto frames = EC::get()->vulkanContext->frames;
+	VkPresentInfoKHR info{};
+	info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	info.waitSemaphoreCount = waitSemaphores.size();
+	info.pWaitSemaphores = waitSemaphores.data();
+	info.swapchainCount = 1;
+	info.pSwapchains = &vkSwapChain;
+	info.pImageIndices = &imageIndex;
+
+	vkQueuePresentKHR(deviceRef->queues.presentQueue, &info);
+}
+
+uint32_t VulkanSwapChain::acquireNextImage(VkSemaphore imageAvailableSemaphore)
+{
+	auto context = EC::get()->vulkanContext;
 
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device.getLogicalDevice(), vkSwapChain, UINT64_MAX, frames[currentFrameIndex].imageAvailableSemaphore,
+	vkAcquireNextImageKHR(deviceRef->getLogicalDevice(), vkSwapChain, UINT64_MAX, imageAvailableSemaphore,
 		VK_NULL_HANDLE, &imageIndex);
 	return imageIndex;
 }

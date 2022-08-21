@@ -12,8 +12,13 @@ void ForwardRenderer::startup()
 {
 	initDescriptorSets();
 
-	std::vector<VkDescriptorSetLayout> layouts;
-	layouts.push_back(frameSetLayout);
+	//std::vector<VkDescriptorSetLayout> layouts;
+	//layouts.push_back(frameSetLayout);
+	frameCommandBuffers.forEach([&](vk::CommandBuffer& cmd) {
+		auto context = EC::get()->vulkanContext;
+		cmd.create(context->getGraphicsCommandPool());
+		std::cout << "x";
+	});
 
 	PipelineBuilder builder;
 	vk::GraphicsPipeline pipeline = builder.setVertexInputStateInfo().setPipelineInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST).
@@ -32,52 +37,33 @@ void ForwardRenderer::startup()
 void ForwardRenderer::shutdown()
 {
 	auto allocator = EC::get()->vulkanContext->allocator;
-	auto& frames = EC::get()->vulkanContext->frames;
+	//auto& frames = EC::get()->vulkanContext->frames;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		frames[i].frameUniforms.destroy();
-		frames[i].objectBuffer.destroy();
+		frameUniforms[i].destroy();
+		objectBuffers[i].destroy();
 	}
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
 	vkDestroyDescriptorPool(device, EC::get()->vulkanContext->descriptorPool, nullptr);
-	vkDestroyDescriptorSetLayout(device, frameSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device, objectUniformLayout, nullptr);
+	frameSetLayout.destroy();
+	objectUniformLayout.destroy();
 }
 
 void ForwardRenderer::initDescriptorSets()
 {
 	auto device = EC::get()->vulkanContext->getDevice().getLogicalDevice();
-	auto& frames = EC::get()->vulkanContext->frames;
 
-	// Set layout for uniform buffer
-	VkDescriptorSetLayoutBinding layoutBindings[2];
-	layoutBindings[0] = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0);
+	frameSetLayout.create({ 
+		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT},
+		{1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT}
+	});
 
-	layoutBindings[1] = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-		VK_SHADER_STAGE_VERTEX_BIT, 1);
-
-	VkDescriptorSetLayoutCreateInfo setInfo = {};
-	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	setInfo.pNext = nullptr;
-	setInfo.bindingCount = 2;
-	setInfo.flags = 0;
-	setInfo.pBindings = layoutBindings;
-	vkCreateDescriptorSetLayout(device, &setInfo, nullptr, &frameSetLayout);
-
-	VkDescriptorSetLayoutBinding textureBinding = vk::getDescripterLayoutBindingInfo(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
-
-	setInfo = {};
-	setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	setInfo.pNext = nullptr;
-	setInfo.bindingCount = 1;
-	setInfo.flags = 0;
-	setInfo.pBindings = &textureBinding;
-	vkCreateDescriptorSetLayout(device, &setInfo, nullptr, &objectUniformLayout);
-
+	objectUniformLayout.create({
+		{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+	});
 
 	std::vector<VkDescriptorPoolSize> sizes = { 
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 }, 
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100}, 
 		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 }
 	};
@@ -91,41 +77,32 @@ void ForwardRenderer::initDescriptorSets()
 
 	vkCreateDescriptorPool(device, &pool_info, nullptr, &EC::get()->vulkanContext->descriptorPool);
 
+	frameUniforms.forEach([&](vk::Buffer& buffer) { buffer.create(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU); });
+	objectBuffers.forEach([&](vk::Buffer& buffer) { buffer.create(sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU); });
+
+
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-
-
-		frames[i].frameUniforms.create(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		frames[i].objectBuffer.create(sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-		// Allocate frame uniform descriptor set
-		VkDescriptorSetAllocateInfo allocInfo = vk::getDescriptorAllocInfo(EC::get()->vulkanContext->descriptorPool, &frameSetLayout, 1);
-		vkAllocateDescriptorSets(device, &allocInfo, &frames[i].frameDescriptor);
-
-		VkDescriptorBufferInfo frameBUfferInfo{};
-		frameBUfferInfo.buffer = frames[i].frameUniforms.handle;
-		frameBUfferInfo.offset = 0;
-		frameBUfferInfo.range = sizeof(PerFrameUniforms);
-
-		VkDescriptorBufferInfo ObjectBufferInfo{};
-		ObjectBufferInfo.buffer = frames[i].objectBuffer.handle;
-		ObjectBufferInfo.offset = 0;
-		ObjectBufferInfo.range = sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT;
-
-		VkWriteDescriptorSet setWrite = vk::writeDescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, frames[i].frameDescriptor,
-			&frameBUfferInfo, 0);
-
-		VkWriteDescriptorSet objectDescriptorWrite = vk::writeDescriptorSet(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
-			frames[i].frameDescriptor, &ObjectBufferInfo, 1);
-
-		VkWriteDescriptorSet setWrites[] = { setWrite, objectDescriptorWrite };
-		vkUpdateDescriptorSets(device, 2, setWrites, 0, nullptr);
-		std::cout << "x";
+		frameSetLayout.setBuffer(0, &frameUniforms[i], 0, frameUniforms[i].bufferSize);
+		frameSetLayout.setBuffer(1, &objectBuffers[i], 0, objectBuffers[i].bufferSize);
+		frameSetLayout.getDescriptorSet(frameDescriptors[i]);
 	}
 }
 
 void ForwardRenderer::update(float deltaTime) {
 
-	sceneRenderer.updateSceneUniforms(currentFrame);
-	sceneRenderer.renderScene(currentFrame);
+	auto context = EC::get()->vulkanContext;
+
+	FrameData frame = {frameCommandBuffers[currentFrame],
+	frameUniforms[currentFrame],
+	objectBuffers[currentFrame],
+	frameDescriptors[currentFrame],
+	objectDescriptorSet[currentFrame],
+	context->inFlightFences[currentFrame],
+	context->imageAvailableSemaphores[currentFrame],
+	context->renderFinishSemaphores[currentFrame],
+	currentFrame};
+
+	sceneRenderer.updateSceneUniforms(frame);
+	sceneRenderer.renderScene(frame);
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

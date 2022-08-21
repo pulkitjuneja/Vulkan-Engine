@@ -13,7 +13,7 @@ struct Material {
 	vk::GraphicsPipeline* pipeline;
 	vk::Texture* diffuseMap;
 	bool needsUpdate;
-	VkDescriptorSet MaterialDescriptorSet[MAX_FRAMES_IN_FLIGHT];
+	vk::DescriptorSet MaterialDescriptorSet[MAX_FRAMES_IN_FLIGHT];
 
 	Material();
 	void setDiffuseTexture(vk::Texture* diffuseMap);

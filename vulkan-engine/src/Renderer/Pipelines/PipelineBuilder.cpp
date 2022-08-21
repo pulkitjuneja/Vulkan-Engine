@@ -31,7 +31,7 @@ vk::GraphicsPipeline PipelineBuilder::build_pipeline(VkRenderPass pass)
 
 	VkDevice device = EngineContext::get()->vulkanContext->getDevice().getLogicalDevice();
 
-	VkDescriptorSetLayout layouts[2] = { Cache.GlobalUniformLayout, Cache.PerObjectLayout };
+	VkDescriptorSetLayout layouts[2] = { Cache.GlobalUniformLayout.handle, Cache.PerObjectLayout.handle};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 2;
 	pipelineLayoutInfo.pSetLayouts = layouts;
@@ -185,7 +185,7 @@ PipelineBuilder& PipelineBuilder::setMultiSamplingInfo()
 	return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setPipelineLayout(VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout PerObjectLayout)
+PipelineBuilder& PipelineBuilder::setPipelineLayout(vk::DescriptorSetLayout globalLayout, vk::DescriptorSetLayout PerObjectLayout)
 {
 	Cache.GlobalUniformLayout = globalLayout;
 	Cache.PerObjectLayout = PerObjectLayout;

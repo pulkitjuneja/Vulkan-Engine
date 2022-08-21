@@ -6,7 +6,6 @@
 #include "Renderer/Vertex.h"
 #include <string>
 #include "Transform.h"
-#include "Renderer/Pipelines/BasicPipeline.h"
 
 class Entity {
 protected:

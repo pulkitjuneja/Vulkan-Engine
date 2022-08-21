@@ -109,7 +109,6 @@
     <ClInclude Include="src\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\Renderer\Uniforms.h" />
     <ClInclude Include="src\Renderer\Vertex.h" />
-    <ClInclude Include="src\Renderer\VulkanCommandBuffer.h" />
     <ClInclude Include="src\Renderer\VulkanContext.h" />
     <ClInclude Include="src\Renderer\VulkanDevice.h" />
     <ClInclude Include="src\Renderer\VulkanHelpers.h" />
@@ -133,7 +132,6 @@
     <ClCompile Include="src\Renderer\Pipelines\PipelineBuilder.cpp" />
     <ClCompile Include="src\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Renderer\Vertex.cpp" />
-    <ClCompile Include="src\Renderer\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Renderer\VulkanContext.cpp" />
     <ClCompile Include="src\Renderer\VulkanDevice.cpp" />
     <ClCompile Include="src\Renderer\VulkanHelpers.cpp" />

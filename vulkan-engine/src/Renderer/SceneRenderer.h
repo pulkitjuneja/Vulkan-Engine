@@ -9,12 +9,25 @@
 #include "VulkanContext.h"
 #include "System.h"
 
+struct FrameData {
+	vk::CommandBuffer cmd;
+	vk::Buffer frameUniforms;
+	vk::Buffer objectUniforms;
+	vk::DescriptorSet frameDescriptorSet;
+	vk::DescriptorSet objectDescriptorSet;
+	VkFence inFlightfence;
+	VkSemaphore imageAvailableSemaphore;
+	VkSemaphore renderFinishedSemaphore;
+
+	int frameIndex;
+};
+
 class SceneRenderer {
 public:
-	void renderScene(size_t currentFrame, 
+	void renderScene(FrameData& frame,
 		bool passBaseMaterialProperties = false);
 
-	void updateSceneUniforms(uint32_t currentFrame);
+	void updateSceneUniforms(FrameData& frame);
 };
 
 #endif // !SCENERENDERER_H

@@ -48,7 +48,7 @@ void Engine::start()
 	isEngineRunning = true;
 
 	try {
-		graphicsContext = std::make_unique<VulkanContext>();
+		graphicsContext = std::make_unique<vk::Context>();
 		EC::get()->vulkanContext = graphicsContext.get();
 		graphicsContext->initialize();
 	}

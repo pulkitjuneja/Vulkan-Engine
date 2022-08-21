@@ -7,15 +7,19 @@
 #include "Allocator.h"
 
 class Window;
-class VulkanContext;
+class Context;
 class ResourceManager;
 class StackAllocator;
 class Scene;
 
+namespace vk {
+	class Context;
+}
+
 class EngineContext {
 public:
 	Window* window;
-	VulkanContext* vulkanContext;
+	vk::Context* vulkanContext;
 	StackAllocator* mainAllocator;
 	ResourceManager* resourceManager;
 	Scene* scene;
