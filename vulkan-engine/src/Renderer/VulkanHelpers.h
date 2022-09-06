@@ -21,8 +21,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 			std::cout <<"Detected Vulkan error: " << err << std::endl; \
 			abort();                                                \
 		}                                                           \
-	} while (0)                 
-
+	} while (0)                
 class VulkanDevice;
 
 namespace utils {
@@ -215,7 +214,7 @@ namespace vk {
 template<class T>
 struct PerFrameData {
     T objects[MAX_FRAMES_IN_FLIGHT];
-    T& operator[] (int& index) { return objects[index]; }
+    T& operator[] (int index) { return objects[index]; }
     T& operator[] (size_t& index) { return objects[index]; }
 
     void forEach(std::function<void(T& object)>&& func) {

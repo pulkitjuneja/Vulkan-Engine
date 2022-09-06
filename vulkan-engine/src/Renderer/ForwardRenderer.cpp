@@ -65,17 +65,17 @@ void ForwardRenderer::initDescriptorSets()
 	std::vector<VkDescriptorPoolSize> sizes = { 
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100}, 
 		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 }
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 100 }
 	};
 
 	VkDescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	pool_info.flags = 0;
-	pool_info.maxSets = 10;
+	pool_info.maxSets = 100;
 	pool_info.poolSizeCount = (uint32_t)sizes.size();
 	pool_info.pPoolSizes = sizes.data();
 
-	vkCreateDescriptorPool(device, &pool_info, nullptr, &EC::get()->vulkanContext->descriptorPool);
+	VkResult res = vkCreateDescriptorPool(device, &pool_info, nullptr, &EC::get()->vulkanContext->descriptorPool);
 
 	frameUniforms.forEach([&](vk::Buffer& buffer) { buffer.create(sizeof(PerFrameUniforms), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU); });
 	objectBuffers.forEach([&](vk::Buffer& buffer) { buffer.create(sizeof(PerObjectUniforms) * MAX_OBJECT_COUNT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU); });

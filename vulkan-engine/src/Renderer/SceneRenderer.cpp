@@ -27,24 +27,24 @@ void SceneRenderer::renderScene(FrameData& frame, bool passBaseMaterialPropertie
 	std::vector<Entity>& entities = scene->getEntities();
 	for (int i = 0 ; i < entities.size(); i++) 
 	{
-		// move this to scripts
-		entities[i].transform.rotate(glm::vec3(0, 0.05f, 0));
+		Entity& ent = entities[i];
+		Mesh& mesh = ent.getMesh();
+
+		// TODO: move this to scripting system
+		ent.transform.rotate(glm::vec3(0, 0.0005f, 0));
 
 		VkDeviceSize offset = 0;
-		vkCmdBindVertexBuffers(frame.cmd.handle,
-			0, 1, &entities[i].getMesh().getVBO(), &offset);
+		vkCmdBindVertexBuffers(frame.cmd.handle, 0, 1, &mesh.getVBO(), &offset);
+		vkCmdBindIndexBuffer(frame.cmd.handle, mesh.getEBO(), 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdBindIndexBuffer(frame.cmd.handle,
-			entities[i].getMesh().getEBO(), 0, VK_INDEX_TYPE_UINT16);
-
-		entities[i].getMesh().subMeshes[0].material.pipeline->bind(frame.cmd);
-
-		vkCmdBindDescriptorSets(frame.cmd.handle, VK_PIPELINE_BIND_POINT_GRAPHICS, entities[i].getMesh().subMeshes[0].material.pipeline->pipelineLayout, 0, 1, &frame.frameDescriptorSet.handle, 0, nullptr);
-
-		vkCmdBindDescriptorSets(frame.cmd.handle, VK_PIPELINE_BIND_POINT_GRAPHICS, entities[i].getMesh().subMeshes[0].material.pipeline->pipelineLayout, 1, 1, &entities[i].getMesh().subMeshes[0].material.MaterialDescriptorSet[frame.frameIndex].handle, 0, nullptr);
-
-		vkCmdDrawIndexed(frame.cmd.handle,
-			static_cast<uint32_t>(entities[i].getMesh().getIndices().size()), 1, 0, 0, i);
+		for (int j = 0; j < mesh.subMeshes.size(); j++) {
+			SubMesh& submesh = mesh.subMeshes[j];
+			submesh.material.pipeline->bind(frame.cmd);
+			vkCmdBindDescriptorSets(frame.cmd.handle, VK_PIPELINE_BIND_POINT_GRAPHICS, submesh.material.pipeline->pipelineLayout, 0, 1, &frame.frameDescriptorSet.handle, 0, nullptr);
+			vkCmdBindDescriptorSets(frame.cmd.handle, VK_PIPELINE_BIND_POINT_GRAPHICS, submesh.material.pipeline->pipelineLayout, 1, 1, &submesh.material.materialDescriptorSet.handle, 0, nullptr);
+			vkCmdDrawIndexed(frame.cmd.handle, submesh.indexCount, 1, submesh.baseIndex, submesh.baseVertex, i);
+		}
+		//entities[i].getMesh().subMeshes[0].material.pipeline->bind(frame.cmd);
 	}
 
 	frame.cmd.endRenderPass();

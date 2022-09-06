@@ -501,7 +501,8 @@ namespace vk {
         info.descriptorPool = pool;
         info.descriptorSetCount = 1;
         info.pSetLayouts = &layout.handle;
-        if (vkAllocateDescriptorSets(layout.deviceRef->logicalDevice, &info, &handle) != VK_SUCCESS) {
+        VkResult res = vkAllocateDescriptorSets(layout.deviceRef->logicalDevice, &info, &handle);
+        if (res != VK_SUCCESS) {
             Logger::logError("Error Allocating Descriptor Set");
             return;
         }

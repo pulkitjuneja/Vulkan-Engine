@@ -10,13 +10,18 @@
 struct Material {
 
 	std::string name;
+	bool needsUpdate;
+
 	vk::GraphicsPipeline* pipeline;
 	vk::Texture* diffuseMap;
-	bool needsUpdate;
-	vk::DescriptorSet MaterialDescriptorSet[MAX_FRAMES_IN_FLIGHT];
+	vk::DescriptorSet materialDescriptorSet;
 
-	Material();
-	void setDiffuseTexture(vk::Texture* diffuseMap);
+	Material() = default;
+
+	// Call this function after setting the textures. Otherwise default textures will be set
+	void create();
+
+	//void setDiffuseTexture(vk::Texture* diffuseMap);
 };
 
 

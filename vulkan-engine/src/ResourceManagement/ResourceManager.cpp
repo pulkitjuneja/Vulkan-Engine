@@ -115,23 +115,16 @@ void ResourceManager::getAiSceneMaterial(const aiScene* scene, int materialIndex
 	material.name = std::string(directory);
 	material.name += "_";
 	material.name += std::to_string(materialIndex);
+	material.pipeline = &getPipeline("BasePipeine");
 
 	if (materialIndex >= 0)
 	{
-		material.pipeline = &getPipeline("BasePipeine");
 		aiMaterial* aiMaterial = scene->mMaterials[materialIndex];
-		vk::Texture* diffuseMap = loadMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, directory);
-		if (diffuseMap != NULL) {
-			material.setDiffuseTexture(diffuseMap);
-		}
+		material.diffuseMap = loadMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, directory);
 		//material.specularMap = loadMaterialTexture(aiMaterial, aiTextureType_SPECULAR, directory);
 		//material.normalMap = loadMaterialTexture(aiMaterial, aiTextureType_HEIGHT, directory);
 	}
-
-	else
-	{	
-		material.pipeline = &getPipeline("BasePipeine");
-	}
+	material.create();
 }
 
 void ResourceManager::savePipeline(std::string name, vk::GraphicsPipeline pipeline)

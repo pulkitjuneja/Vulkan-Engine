@@ -16,8 +16,9 @@ void Engine::initScene()
 	// Todo : Move default resource initialization to engine specific function
 	resourceManager->loadTexture("Assets/Textures/Default.jpg");
 
+	Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/sponza/sponza.obj");
 	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
-	Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/Crate/Crate1.obj");
+	//Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/Crate/Crate1.obj");
 	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
 	scene.createDirectionalLight(glm::vec4(-1, -1, 0, 0), glm::vec4(1, 1, 0, 1.0), 5);
 
