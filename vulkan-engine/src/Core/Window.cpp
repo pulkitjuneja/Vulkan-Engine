@@ -1,6 +1,6 @@
 #include "Window.h"
 
-Window::Window(int width, int height, std::string title)
+Window::Window()
 {
     if (!glfwInit())
     {
@@ -10,7 +10,7 @@ Window::Window(int width, int height, std::string title)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(width, height, "Vulkan Engine", nullptr, nullptr);
 }
 
 void Window::shutdown()

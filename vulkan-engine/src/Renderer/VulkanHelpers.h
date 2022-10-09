@@ -81,7 +81,10 @@ namespace vk {
         VkImageViewType viewType;
         VulkanDevice* deviceRef;
 
-        bool hasSampler;
+        // TODO: Temporary only for debugging, remove
+        std::string name;
+
+        bool hasSampler = false;
 
         void create(VkFormat format,
             VkImageUsageFlags usageFlags,

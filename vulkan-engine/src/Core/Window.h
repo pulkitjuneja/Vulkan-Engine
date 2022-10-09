@@ -7,15 +7,18 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <string>
+#include "Constants.h"
 
-class Window {
+struct  Window {
 	GLFWwindow* window;
-public:
+	int width = SCREEN_WIDTH;
+	int height = SCREEN_HEIGHT;
+
 	void hookEvents();
 	void shutdown();
 	void display();
 	GLFWwindow* getNativeWindow();
-	Window(int width, int height, std::string title);
+	Window();
 };
 
 #endif

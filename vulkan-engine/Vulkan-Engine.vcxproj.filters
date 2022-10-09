@@ -6,10 +6,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Engine.h" />
-    <ClInclude Include="src\EngineContext.h" />
-    <ClInclude Include="src\FixedSizeQueue.h" />
-    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Core\Engine.h" />
+    <ClInclude Include="src\Core\EngineContext.h" />
+    <ClInclude Include="src\Utils\FixedSizeQueue.h" />
+    <ClInclude Include="src\Core\Logger.h" />
     <ClInclude Include="src\Renderer\VulkanContext.h">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -22,15 +22,15 @@
     <ClInclude Include="src\Renderer\VulkanInstance.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Window.h" />
-    <ClInclude Include="src\Allocator.h" />
+    <ClInclude Include="src\Core\Window.h" />
+    <ClInclude Include="src\Core\Allocator.h" />
     <ClInclude Include="src\Scene\Transform.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\ResourceManagement\ResourceManager.h" />
     <ClInclude Include="src\Scene\Camera.h" />
-    <ClInclude Include="src\Constants.h" />
-    <ClInclude Include="src\System.h" />
+    <ClInclude Include="src\Core\Constants.h" />
+    <ClInclude Include="src\Core\System.h" />
     <ClInclude Include="src\Renderer\ForwardRenderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -52,11 +52,14 @@
     <ClInclude Include="src\Renderer\VulkanHelpers.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Script.h" />
+    <ClInclude Include="src\Scene\ScriptingSystem.h" />
+    <ClInclude Include="src\Utils\TypeName.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\EngineContext.cpp" />
-    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\Core\Engine.cpp" />
+    <ClCompile Include="src\Core\EngineContext.cpp" />
+    <ClCompile Include="src\Core\Logger.cpp" />
     <ClCompile Include="src\Renderer\VulkanContext.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
@@ -67,7 +70,7 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Source.cpp" />
-    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\Core\Window.cpp" />
     <ClCompile Include="src\Scene\Transform.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
@@ -95,5 +98,7 @@
     <ClCompile Include="src\Renderer\VulkanInstance.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\ScriptingSystem.cpp" />
+    <ClCompile Include="src\Core\System.cpp" />
   </ItemGroup>
 </Project>

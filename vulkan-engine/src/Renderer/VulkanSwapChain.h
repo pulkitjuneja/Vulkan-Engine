@@ -3,10 +3,10 @@
 #ifndef VULKAN_SWAP_CHAIN_H
 #define VULKAN_SWAP_CHAIN_H
 
-#include "Window.h"
+#include "Core/Window.h"
 #include <vector>
 #include "VulkanDevice.h"
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "VulkanHelpers.h"
 
 struct VulkanSwapChain {

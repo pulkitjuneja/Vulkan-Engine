@@ -2,7 +2,7 @@
 
 #ifndef LOGGER_H
 
-#include "FixedSizeQueue.h"
+#include "Utils/FixedSizeQueue.h"
 #include <chrono>
 #include <ctime>
 #include <iomanip>

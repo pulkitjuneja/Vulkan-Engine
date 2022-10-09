@@ -9,7 +9,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "Renderer/Vertex.h"
-#include "Allocator.h"
+#include "Core/Allocator.h"
 
 class ResourceManager {
 private:
@@ -17,9 +17,13 @@ private:
 	std::unordered_map<std::string, vk::GraphicsPipeline> loadedPipelines;
 	std::unordered_map<std::string, vk::Texture> loadedTextures;
 
-	StackAllocator* resourceAllocator;
+	StackAllocator resourceAllocator;
 public:
-	ResourceManager();
+	ResourceManager(IAllocator* allocator);
+	~ResourceManager() {
+		// here
+		std::cout << "here";
+	}
 	void release();
 
 	Mesh* loadMesh(std::string path, int loaderFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);

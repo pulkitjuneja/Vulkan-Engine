@@ -5,12 +5,12 @@
 
 #include "vk_mem_alloc.h"
 
-#include "Window.h"
+#include "Core/Window.h"
 #include <vector>
 #include <functional>
-#include "Logger.h"
+#include "Core/Logger.h"
 #include "VulkanDevice.h"
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "VulkanSwapChain.h"
 #include "VulkanInstance.h"
 

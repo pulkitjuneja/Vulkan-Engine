@@ -8,16 +8,17 @@
 #include "Renderer/Pipelines/PipelineBuilder.h"
 
 
-Engine::Engine() : mainAllocator(1024 * 1024 * 800) {}
+Engine::Engine() : mainAllocator(1024 * 1024 * 800),
+resourceManager(&mainAllocator) {}
 
 
 void Engine::initScene()
 {
 	// Todo : Move default resource initialization to engine specific function
-	resourceManager->loadTexture("Assets/Textures/Default.jpg");
+	resourceManager.loadTexture("Assets/Textures/Default.jpg");
 
-	Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/sponza/sponza.obj");
-	Mesh* monkeyMesh = resourceManager->loadMesh("Assets/Meshes/BlenderMonkey.obj");
+	Mesh* cubeMesh = resourceManager.loadMesh("Assets/Meshes/sponza/sponza.obj");
+	Mesh* monkeyMesh = resourceManager.loadMesh("Assets/Meshes/BlenderMonkey.obj");
 	//Mesh* cubeMesh = resourceManager->loadMesh("Assets/Meshes/Crate/Crate1.obj");
 	scene.setMainCamera(glm::vec3(0, 0, -2.0f), glm::vec3(0, 90, 0), 80.0f, float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 200.0f);
 	scene.createDirectionalLight(glm::vec4(-1, -1, 0, 0), glm::vec4(1, 1, 0, 1.0), 5);
@@ -29,53 +30,51 @@ void Engine::initScene()
 	cube.transform.setPosition(glm::vec3(0, 0, 3));
 }
 
-void Engine::renderLoop()
-{
-	//renderer.renderScene(scene, currentFrame);
-	renderer.update(0);
-}
+//void Engine::renderLoop()
+//{
+//	//renderer.renderScene(scene, currentFrame);
+//	renderer.update(0);
+//}
 
 void Engine::start()
 {
+
 	EC::get()->mainAllocator = &mainAllocator;
-
-	window = std::make_unique<Window>(1366, 768, "Vulkan Engine");
-	resourceManager = Mem::Allocate<ResourceManager>();
-
-	EC::get()->window = window.get();
-	EC::get()->resourceManager = resourceManager;
+	EC::get()->window = &window;
+	EC::get()->resourceManager = &resourceManager;
 	EC::get()->scene = &scene;
-
-	isEngineRunning = true;
+	EC::get()->vulkanContext = &graphicsContext;
 
 	try {
-		graphicsContext = std::make_unique<vk::Context>();
-		EC::get()->vulkanContext = graphicsContext.get();
-		graphicsContext->initialize();
+		graphicsContext.initialize();
 	}
 	catch (const std::exception& e) {
 		Logger::logError(e.what());
 		isEngineRunning = false;
 	}
 
-	renderer.startup();
+	coreSystems.registerSystem<ForwardRenderer>();
+	coreSystems.initialize();
+
 	initScene();
 
+	isEngineRunning = true;
+
 	while (isEngineRunning) {
-		if (glfwWindowShouldClose(window->getNativeWindow())) {
+		if (glfwWindowShouldClose(window.getNativeWindow())) {
 			isEngineRunning = false;
 		}
-		window->display();
-		renderLoop();
+		window.display();
+		coreSystems.update(0);
 	}
-	vkDeviceWaitIdle(graphicsContext->getDevice().logicalDevice);
+	vkDeviceWaitIdle(graphicsContext.getDevice().logicalDevice);
 }
 
 Engine::~Engine()
 {	
 	renderer.shutdown();
 	scene.release();
-	resourceManager->release();
-	graphicsContext->release();
-	window->shutdown();
+	resourceManager.release();
+	graphicsContext.release();
+	window.shutdown();
 }

@@ -1,7 +1,7 @@
 #include "Vertex.h"
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "Renderer/VulkanContext.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {

@@ -4,7 +4,7 @@
 #define UNIFORMS_H
 
 #include "glm/glm.hpp"
-#include "Constants.h"
+#include "Core/Constants.h"
 
 struct Light {};
 

@@ -11,29 +11,30 @@
 #include "Renderer/Vertex.h"
 #include "Scene/Scene.h"
 #include "Renderer/ForwardRenderer.h"
+#include "System.h"
 #include "ResourceManagement/ResourceManager.h"
 
 class Engine {
 protected:
-	std::unique_ptr<Window> window;
-	std::unique_ptr<vk::Context> graphicsContext;
-	bool isEngineRunning;
-	size_t currentFrame = 0;
-
-	vk::GraphicsPipeline pipeline;
-
-	Scene scene;
-	ForwardRenderer renderer;
-
+	Window window;
+	vk::Context graphicsContext;
 	StackAllocator mainAllocator;
-	ResourceManager* resourceManager;
+	ResourceManager resourceManager;
+	Scene scene;
+	
+	SystemManager coreSystems;
+
+
+	bool isEngineRunning;
+
+	ForwardRenderer renderer;
 
 public:
 	Engine();
 	~Engine();
 
 	void initScene();
-	void renderLoop();
+	//void renderLoop();
 	void start();
 };
 

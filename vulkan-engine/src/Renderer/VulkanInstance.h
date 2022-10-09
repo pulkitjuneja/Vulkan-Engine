@@ -3,9 +3,9 @@
 #ifndef VULKAN_INSTANCE
 #define VULKAN_INSTANCE
 
-#include "Window.h"
+#include "Core/Window.h"
 #include <vector>
-#include "Logger.h"
+#include "Core/Logger.h"
 
 struct VulkanInstance {
 	VkInstance vkInstance;

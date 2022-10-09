@@ -5,9 +5,9 @@
 
 #include "Scene/Scene.h"
 #include "Uniforms.h"
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "VulkanContext.h"
-#include "System.h"
+#include "Core/System.h"
 
 struct FrameData {
 	vk::CommandBuffer cmd;

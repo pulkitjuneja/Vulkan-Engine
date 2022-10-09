@@ -1,5 +1,5 @@
 #include "VulkanHelpers.h"
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "VulkanContext.h" 
 
 namespace vk {
@@ -364,7 +364,10 @@ namespace vk {
         samplerInfo.addressModeU = samplerAddressMode;
         samplerInfo.addressModeV = samplerAddressMode;
         samplerInfo.addressModeW = samplerAddressMode;
-        vkCreateSampler(deviceRef->logicalDevice, &samplerInfo, nullptr, &sampler);
+        if (vkCreateSampler(deviceRef->logicalDevice, &samplerInfo, nullptr, &sampler) != VK_SUCCESS) {
+            Logger::logError("Error creating image view");
+        }
+        
         hasSampler = true;
     }
 

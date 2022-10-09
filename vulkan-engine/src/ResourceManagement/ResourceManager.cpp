@@ -1,15 +1,14 @@
 #include "ResourceManager.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 #include "glm/glm.hpp"
 #include "Renderer/VulkanContext.h"
-#include "Allocator.h"
+#include "Core/Allocator.h"
 #include "stb_image.h"
 
+// 1024 * 1024 * 400 - 400 MB
+#define RESOURCE_POOL_SIZE 419430400
 
-ResourceManager::ResourceManager()
-{
-	resourceAllocator = Mem::Allocate<StackAllocator>(1024 * 1024 * 400, EC::get()->mainAllocator);  // 300 mb reserved for resources
-}
+ResourceManager::ResourceManager(IAllocator* allocator) : resourceAllocator(RESOURCE_POOL_SIZE, allocator) {}
 
 Mesh* ResourceManager::loadMesh(std::string path, int loaderFlags)
 {
@@ -168,6 +167,7 @@ vk::Texture* ResourceManager::loadTexture(std::string path)
 	texture.copyFromBuffer(stagingBuffer);
 	texture.createView(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D);
 	texture.createSampler(VK_FILTER_NEAREST, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT);
+	texture.name = path;
 
 	stagingBuffer.destroy();
 	Logger::logInfo("Texture Loaded " + path);

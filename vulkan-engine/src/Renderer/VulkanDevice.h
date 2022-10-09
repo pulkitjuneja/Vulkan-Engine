@@ -5,10 +5,10 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include "Logger.h"
+#include "Core/Logger.h"
 #include <optional>
 #include <set>
-#include "EngineContext.h"
+#include "Core/EngineContext.h"
 #include "VulkanInstance.h"
 
 struct QueueFamilyIndices {

@@ -23,10 +23,12 @@ public:
 	StackAllocator(size_t sizeInBytes, IAllocator* parent = nullptr) {
 		if (parent == nullptr) {
 			buffer = new std::byte[sizeInBytes];
+			hasParent = false;
 		}
 		else {
 			void* bytes = parent->Alloc(sizeInBytes);
 			buffer = new(bytes) std::byte[sizeInBytes];
+			hasParent = true;
 		}
 		current = buffer;
 		totalSize = sizeInBytes;
@@ -68,19 +70,21 @@ public:
 
 	virtual void Release() override
 	{
-		current = buffer;
-		delete[] current;
+		if (!hasParent) {
+			current = buffer;
+			delete[] current;
+		}
 	}
 
 	~StackAllocator() {
-		current = buffer;
-		delete[] current;
+		Release();
 	}
 
 private:
 	std::byte* buffer = nullptr;
 	std::byte* current = nullptr;
 	std::byte* marker = nullptr;
+	bool hasParent;
 	size_t totalSize = 0;
 };
 
@@ -95,9 +99,8 @@ namespace Mem {
 
 
 	template<typename T, typename ...Args>
-	T* Allocate(StackAllocator* allocator, Args&& ... args) {
-		IAllocator* defaultAllocator = EngineContext::get()->mainAllocator;
-		void* alloc = defaultAllocator->Alloc(sizeof(T));
+	T* Allocate(StackAllocator& allocator, Args&& ... args) {
+		void* alloc = allocator.Alloc(sizeof(T));
 		return new(alloc) T(std::forward<Args>(args)...);
 
 	}
